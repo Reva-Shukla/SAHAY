@@ -3,10 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ShieldCheck, Lock, Mail, UserCheck, AlertTriangle, MapPin, ArrowRight, CheckCircle2 } from 'lucide-react';
 import { useAuth } from '../auth/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
 import { INDIAN_STATES_DISTRICTS, getStateDistricts } from '../data/statesAndDistricts';
 import { Navbar } from '../components/Navbar';
 
 export const CounsellorLogin: React.FC = () => {
+  const { language, setLanguage } = useLanguage();
   const navigate = useNavigate();
   const { session, loginStep, login, completeOnboarding } = useAuth();
 
@@ -75,8 +77,56 @@ export const CounsellorLogin: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col justify-between">
-      <Navbar />
+    <div className="min-h-screen bg-gradient-to-br from-[#e6f7f4] via-[#fefae0] to-[#e8f0fe] text-slate-900 flex flex-col justify-between relative overflow-hidden">
+      
+      {/* Soft Ambient Blobs (No leaves) */}
+      <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-emerald-200/30 rounded-full blur-[100px] pointer-events-none"></div>
+      <div className="absolute bottom-0 right-0 w-[600px] h-[600px] bg-indigo-200/30 rounded-full blur-[100px] pointer-events-none"></div>
+
+      <div className="relative z-10 flex flex-col justify-between min-h-screen">
+        <Navbar />
+
+      {/* Language Switcher Bar & Role Switcher */}
+      <div className="bg-white/80 border-b border-slate-200 py-2 px-4">
+        <div className="max-w-xl mx-auto flex items-center justify-between text-xs">
+          <button
+            onClick={() => navigate('/')}
+            className="flex items-center gap-1.5 font-bold text-slate-600 hover:text-slate-900 transition-colors"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-indigo-600"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            <span>{language === 'hi' ? 'मुख्य पृष्ठ पर जाएं' : 'Switch Role / Home'}</span>
+          </button>
+
+          {/* Language Toggle Pills */}
+          <div className="flex items-center gap-1 bg-slate-100 p-0.5 rounded-lg border border-slate-200">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-slate-500 ml-1.5"><circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/><path d="M2 12h20"/></svg>
+            <button
+              onClick={() => {
+                setLanguage('en');
+                localStorage.setItem('sahay_language', 'en');
+                localStorage.setItem('sahay_language_selected', 'true');
+              }}
+              className={`px-2.5 py-0.5 rounded-md font-bold text-[11px] transition-all ${
+                language === 'en' ? 'bg-indigo-600 text-white shadow-xs' : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              English
+            </button>
+            <button
+              onClick={() => {
+                setLanguage('hi');
+                localStorage.setItem('sahay_language', 'hi');
+                localStorage.setItem('sahay_language_selected', 'true');
+              }}
+              className={`px-2.5 py-0.5 rounded-md font-bold text-[11px] transition-all ${
+                language === 'hi' ? 'bg-indigo-600 text-white shadow-xs' : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              हिन्दी
+            </button>
+          </div>
+        </div>
+      </div>
 
       <main className="flex-1 max-w-md w-full mx-auto px-4 py-8 sm:py-12 flex flex-col justify-center">
         
@@ -107,7 +157,7 @@ export const CounsellorLogin: React.FC = () => {
             </div>
 
             {/* Login Card */}
-            <div className="p-6 sm:p-8 rounded-3xl bg-white border border-slate-200/90 shadow-xl space-y-5">
+            <div className="p-6 sm:p-8 rounded-3xl bg-white/60 backdrop-blur-xl border border-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] space-y-5">
               
               <form onSubmit={handleLoginSubmit} className="space-y-4">
                 {/* Counsellor ID Field */}
@@ -239,7 +289,7 @@ export const CounsellorLogin: React.FC = () => {
               </p>
             </div>
 
-            <div className="p-6 sm:p-8 rounded-3xl bg-white border border-slate-200/90 shadow-xl space-y-5">
+            <div className="p-6 sm:p-8 rounded-3xl bg-white/60 backdrop-blur-xl border border-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] space-y-5">
               
               <form onSubmit={handleOnboardingSubmit} className="space-y-4">
                 
@@ -303,6 +353,7 @@ export const CounsellorLogin: React.FC = () => {
       <footer className="py-4 text-center text-xs text-slate-500 border-t border-slate-200 bg-white">
         SAHAY Portal — Mental Health Support System (Smart India Hackathon 2026)
       </footer>
+      </div>
     </div>
   );
 };

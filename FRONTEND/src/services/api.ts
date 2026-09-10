@@ -18,9 +18,17 @@ export const fetchCasesByJurisdiction = async (state: string, district: string):
     (c) => c.state.toLowerCase() === state.toLowerCase() && c.district.toLowerCase() === district.toLowerCase()
   );
 
-  // Sort by risk level: RED -> AMBER -> GREEN
-  const riskPriority = { RED: 0, AMBER: 1, GREEN: 2 };
-  return filtered.sort((a, b) => riskPriority[a.riskLevel] - riskPriority[b.riskLevel]);
+  // Sort by risk level: RED -> YELLOW -> GREEN
+  const riskPriority = { RED: 0, YELLOW: 1, GREEN: 2 };
+  
+  return filtered.sort((a, b) => {
+    // Primary sort: Risk Level
+    if (riskPriority[a.riskLevel] !== riskPriority[b.riskLevel]) {
+      return riskPriority[a.riskLevel] - riskPriority[b.riskLevel];
+    }
+    // Secondary sort: Distress Score
+    return b.currentScore - a.currentScore;
+  });
 };
 
 /**
@@ -37,7 +45,7 @@ export const fetchCaseDistressHistory = async (caseId: string): Promise<Distress
  * BACKEND INTEGRATION POINT: GET /api/cases/:id/recommendations
  * Fetches AI-generated intervention recommendations customized for the patient's current risk level.
  */
-export const fetchCaseRecommendations = async (riskLevel: 'GREEN' | 'AMBER' | 'RED'): Promise<InterventionRecommendation[]> => {
+export const fetchCaseRecommendations = async (riskLevel: 'GREEN' | 'YELLOW' | 'RED'): Promise<InterventionRecommendation[]> => {
   await delay(300);
   return getInterventionsForRisk(riskLevel);
 };

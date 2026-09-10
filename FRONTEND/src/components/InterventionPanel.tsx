@@ -27,7 +27,7 @@ export const InterventionPanel: React.FC<Props> = ({ recommendations, patientId,
   const getCategoryIcon = (category: string) => {
     switch (category) {
       case 'Counselling': return <Stethoscope className="w-4 h-4 text-cyan-600" />;
-      case 'Legal Aid': return <Scale className="w-4 h-4 text-amber-600" />;
+      case 'Legal Aid': return <Scale className="w-4 h-4 text-yellow-600" />;
       case 'Relocation': return <Home className="w-4 h-4 text-emerald-600" />;
       case 'Financial Assistance': return <DollarSign className="w-4 h-4 text-purple-600" />;
       default: return <ShieldCheck className="w-4 h-4 text-indigo-600" />;
@@ -38,14 +38,14 @@ export const InterventionPanel: React.FC<Props> = ({ recommendations, patientId,
     <div className="space-y-3">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <AlertOctagon className={`w-5 h-5 ${patientRisk === 'RED' ? 'text-rose-600 animate-pulse' : patientRisk === 'AMBER' ? 'text-amber-600' : 'text-emerald-600'}`} />
+          <AlertOctagon className={`w-5 h-5 ${patientRisk === 'RED' ? 'text-rose-600 animate-pulse' : patientRisk === 'YELLOW' ? 'text-yellow-600' : 'text-emerald-600'}`} />
           <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wider">
             AI Recommended Interventions
           </h3>
         </div>
         <span className={`text-xs px-2.5 py-0.5 rounded-full font-bold uppercase ${
           patientRisk === 'RED' ? 'bg-rose-100 text-rose-800 border border-rose-200' :
-          patientRisk === 'AMBER' ? 'bg-amber-100 text-amber-800 border border-amber-200' :
+          patientRisk === 'YELLOW' ? 'bg-yellow-100 text-yellow-800 border border-yellow-200' :
           'bg-emerald-100 text-emerald-800 border border-emerald-200'
         }`}>
           {patientRisk} Priority Protocol

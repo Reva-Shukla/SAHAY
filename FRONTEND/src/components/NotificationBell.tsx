@@ -12,7 +12,7 @@ export const NotificationBell: React.FC<{ count: number }> = ({ count }) => {
         className="relative p-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 transition-all focus:outline-none"
         aria-label="High Risk Alerts"
       >
-        <Bell className={`w-4 h-4 ${count > 0 ? 'text-amber-600 animate-bounce' : 'text-slate-500'}`} />
+        <Bell className={`w-4 h-4 ${count > 0 ? 'text-yellow-600 animate-bounce' : 'text-slate-500'}`} />
         {count > 0 && (
           <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-rose-600 text-[10px] font-bold text-white shadow-lg animate-pulse-red">
             {count}

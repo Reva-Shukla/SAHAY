@@ -1,22 +1,14 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
-import { HeartPulse, ShieldCheck, User, Sparkles, PhoneCall, Globe, ArrowRight, Lock, CheckCircle2, X } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { HeartPulse, ShieldCheck, User, Sparkles, PhoneCall, ArrowRight, Lock, CheckCircle2 } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
-import type { SupportedLanguage } from '../context/LanguageContext';
 
 export const LandingPage: React.FC = () => {
   const navigate = useNavigate();
-  const { setLanguage } = useLanguage();
-  const [showLanguageModal, setShowLanguageModal] = useState(false);
+  const { language, setLanguage, t } = useLanguage();
 
   const handleSelectPatientRole = () => {
-    setShowLanguageModal(true);
-  };
-
-  const handleChooseLanguage = (lang: SupportedLanguage) => {
-    setLanguage(lang);
-    setShowLanguageModal(false);
     navigate('/patient');
   };
 
@@ -25,12 +17,23 @@ export const LandingPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col justify-between relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-[#e6f7f4] via-[#fefae0] to-[#e8f0fe] text-slate-900 flex flex-col justify-between relative overflow-hidden">
       
       {/* Background Decorative Ambient Pastel Blobs */}
-      <div className="absolute -top-40 -left-40 w-96 h-96 bg-emerald-200/40 rounded-full blur-3xl pointer-events-none animate-pulse"></div>
-      <div className="absolute top-1/3 -right-40 w-96 h-96 bg-indigo-200/40 rounded-full blur-3xl pointer-events-none animate-pulse"></div>
-      <div className="absolute -bottom-40 left-1/3 w-96 h-96 bg-teal-200/40 rounded-full blur-3xl pointer-events-none"></div>
+      <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-emerald-200/30 rounded-full blur-[100px] pointer-events-none"></div>
+      <div className="absolute top-1/4 right-0 w-[600px] h-[600px] bg-indigo-200/30 rounded-full blur-[100px] pointer-events-none"></div>
+      <div className="absolute bottom-0 left-1/4 w-[700px] h-[700px] bg-amber-100/40 rounded-full blur-[120px] pointer-events-none"></div>
+
+      {/* SVG Leaves Decorative Element */}
+      <svg className="absolute top-20 right-0 w-64 h-96 pointer-events-none opacity-60" viewBox="0 0 200 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M180 50 Q130 30 110 80 Q100 120 150 140 Q190 120 180 50 Z" fill="#bce4d0"/>
+        <path d="M195 100 Q155 90 145 130 Q140 160 175 175 Q205 160 195 100 Z" fill="#9cd3bc"/>
+        <path d="M160 160 Q120 150 110 190 Q100 230 145 245 Q185 220 160 160 Z" fill="#d1eedf"/>
+      </svg>
+      <svg className="absolute bottom-10 left-10 w-48 h-48 pointer-events-none opacity-60" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M30 150 Q50 100 100 120 Q140 130 120 180 Q80 190 30 150 Z" fill="#bce4d0"/>
+        <path d="M10 180 Q40 140 80 160 Q110 170 90 200 Q50 210 10 180 Z" fill="#9cd3bc"/>
+      </svg>
 
       {/* Top Header Navigation */}
       <header className="bg-white/90 border-b border-slate-200/80 backdrop-blur-md sticky top-0 z-40 shadow-xs">
@@ -61,6 +64,39 @@ export const LandingPage: React.FC = () => {
           </div>
         </div>
       </header>
+      
+      {/* Language Switcher Bar */}
+      <div className="bg-white/80 border-b border-slate-200 py-2 px-4 z-40 relative">
+        <div className="max-w-7xl mx-auto flex items-center justify-end text-xs">
+          <div className="flex items-center gap-1 bg-slate-100 p-0.5 rounded-lg border border-slate-200">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-slate-500 ml-1.5"><circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/><path d="M2 12h20"/></svg>
+            <button
+              onClick={() => {
+                setLanguage('en');
+                localStorage.setItem('sahay_language', 'en');
+                localStorage.setItem('sahay_language_selected', 'true');
+              }}
+              className={`px-2.5 py-0.5 rounded-md font-bold text-[11px] transition-all ${
+                language === 'en' ? 'bg-indigo-600 text-white shadow-xs' : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              English
+            </button>
+            <button
+              onClick={() => {
+                setLanguage('hi');
+                localStorage.setItem('sahay_language', 'hi');
+                localStorage.setItem('sahay_language_selected', 'true');
+              }}
+              className={`px-2.5 py-0.5 rounded-md font-bold text-[11px] transition-all ${
+                language === 'hi' ? 'bg-indigo-600 text-white shadow-xs' : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              हिन्दी
+            </button>
+          </div>
+        </div>
+      </div>
 
       {/* Main Hero & Role Selection Content */}
       <main className="flex-1 max-w-5xl w-full mx-auto px-4 py-10 sm:py-16 flex flex-col justify-center items-center z-10 space-y-10">
@@ -73,7 +109,7 @@ export const LandingPage: React.FC = () => {
             className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-50 border border-indigo-200 text-indigo-800 text-xs font-bold shadow-xs"
           >
             <Sparkles className="w-4 h-4 text-indigo-600" />
-            <span>AI-Powered Mental Health Monitoring & Distress Prediction System</span>
+            <span>{t.aiSystemLabel}</span>
           </motion.div>
 
           <motion.h1
@@ -82,7 +118,15 @@ export const LandingPage: React.FC = () => {
             transition={{ delay: 0.1 }}
             className="text-3xl sm:text-5xl font-extrabold text-slate-900 tracking-tight leading-tight"
           >
-            Welcome to <span className="bg-gradient-to-r from-emerald-600 via-teal-600 to-indigo-600 bg-clip-text text-transparent">SAHAY</span>
+            {language === 'hi' ? (
+              <>
+                <span className="bg-gradient-to-r from-emerald-600 via-teal-600 to-indigo-600 bg-clip-text text-transparent">SAHAY</span> {t.welcomeTo}
+              </>
+            ) : (
+              <>
+                {t.welcomeTo} <span className="bg-gradient-to-r from-emerald-600 via-teal-600 to-indigo-600 bg-clip-text text-transparent">SAHAY</span>
+              </>
+            )}
           </motion.h1>
 
           <motion.p
@@ -91,16 +135,16 @@ export const LandingPage: React.FC = () => {
             transition={{ delay: 0.2 }}
             className="text-xs sm:text-base text-slate-600 max-w-2xl mx-auto leading-relaxed"
           >
-            A two-sided secure portal connecting patients and caretakers with clinical counsellors for early distress intervention and care.
+            {t.portalDescription}
           </motion.p>
         </div>
 
         {/* Role Selection Question Banner */}
         <div className="text-center space-y-1">
           <h2 className="text-sm sm:text-base font-extrabold uppercase tracking-wider text-slate-700">
-            Please Select Your Role to Continue
+            {t.selectRoleTitle}
           </h2>
-          <p className="text-xs text-slate-500">आप किस रूप में प्रवेश करना चाहते हैं?</p>
+          <p className="text-xs text-slate-500">{t.selectRoleSubtitle}</p>
         </div>
 
         {/* Two Interactive Role Cards */}
@@ -111,79 +155,65 @@ export const LandingPage: React.FC = () => {
             whileHover={{ scale: 1.025, y: -4 }}
             whileTap={{ scale: 0.98 }}
             onClick={handleSelectPatientRole}
-            className="p-6 sm:p-8 rounded-3xl bg-white border border-emerald-200 hover:border-emerald-400 shadow-xl hover:shadow-2xl transition-all cursor-pointer group flex flex-col justify-between space-y-6 relative overflow-hidden"
+            className="p-6 sm:p-8 rounded-3xl bg-gradient-to-br from-emerald-50/70 to-emerald-100/40 backdrop-blur-xl border border-white hover:border-emerald-200 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgb(16,185,129,0.1)] transition-all cursor-pointer group flex flex-col justify-between space-y-6 relative overflow-hidden"
           >
-            <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-100/50 rounded-bl-full pointer-events-none group-hover:scale-110 transition-transform"></div>
+            <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-200/30 rounded-bl-full pointer-events-none group-hover:scale-110 transition-transform"></div>
 
-            <div className="space-y-4">
-              <div className="w-14 h-14 rounded-2xl bg-emerald-100 text-emerald-700 border border-emerald-300 flex items-center justify-center shadow-xs">
-                <User className="w-7 h-7" />
+            <div className="space-y-4 flex flex-col items-center text-center">
+              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-100 to-emerald-200 text-emerald-800 border border-emerald-300 flex items-center justify-center shadow-sm">
+                <User className="w-8 h-8" />
               </div>
 
               <div>
-                <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-700 block">
-                  Open Access Support
+                <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-700 block mb-1">
+                  {t.openAccessSupport}
                 </span>
                 <h3 className="text-xl font-extrabold text-slate-900 group-hover:text-emerald-700 transition-colors">
-                  Patient or Caretaker
+                  {t.patientOrCaretaker}
                 </h3>
-                <p className="text-xs font-semibold text-slate-500 mt-0.5">
-                  मरीज़ या देखभालकर्ता
-                </p>
               </div>
-
-              <p className="text-xs text-slate-600 leading-relaxed">
-                Simple daily check-in with mood tracker, text journal, and optional voice note recording. Safe, easy-access, and 100% confidential.
+              <p className="text-sm text-slate-600 leading-relaxed max-w-[250px]">
+                {t.patientCardDesc}
               </p>
             </div>
 
-            <button
-              type="button"
-              className="w-full py-3 px-4 rounded-2xl bg-emerald-600 group-hover:bg-emerald-700 text-white font-bold text-xs shadow-md shadow-emerald-600/20 transition-all flex items-center justify-center gap-2"
-            >
-              <span>Continue as Patient / Caretaker</span>
-              <ArrowRight className="w-4 h-4" />
-            </button>
+            <div className="flex items-center justify-center gap-2 text-white font-bold text-sm bg-emerald-500 shadow-md shadow-emerald-500/20 px-6 py-3 rounded-xl w-fit mx-auto group-hover:bg-emerald-600 transition-all">
+              <span>{t.continueAsPatient}</span>
+              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+            </div>
           </motion.div>
 
-          {/* Role Card 2: Authorized Counsellor / Official */}
+          {/* Role Card 2: Official Counsellor / Admin */}
           <motion.div
             whileHover={{ scale: 1.025, y: -4 }}
             whileTap={{ scale: 0.98 }}
             onClick={handleSelectCounsellorRole}
-            className="p-6 sm:p-8 rounded-3xl bg-white border border-indigo-200 hover:border-indigo-400 shadow-xl hover:shadow-2xl transition-all cursor-pointer group flex flex-col justify-between space-y-6 relative overflow-hidden"
+            className="p-6 sm:p-8 rounded-3xl bg-gradient-to-br from-indigo-50/70 to-indigo-100/40 backdrop-blur-xl border border-white hover:border-indigo-200 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgb(79,70,229,0.1)] transition-all cursor-pointer group flex flex-col justify-between space-y-6 relative overflow-hidden"
           >
-            <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-100/50 rounded-bl-full pointer-events-none group-hover:scale-110 transition-transform"></div>
-
-            <div className="space-y-4">
-              <div className="w-14 h-14 rounded-2xl bg-indigo-100 text-indigo-700 border border-indigo-300 flex items-center justify-center shadow-xs">
-                <ShieldCheck className="w-7 h-7" />
+            <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-200/30 rounded-bl-full pointer-events-none group-hover:scale-110 transition-transform"></div>
+            
+            <div className="space-y-4 flex flex-col items-center text-center">
+              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-100 to-indigo-200 text-indigo-800 border border-indigo-300 flex items-center justify-center shadow-sm">
+                <ShieldCheck className="w-8 h-8" />
               </div>
 
               <div>
-                <span className="text-[11px] font-bold uppercase tracking-wider text-indigo-700 block">
-                  Restricted Department Access
+                <span className="text-[11px] font-bold uppercase tracking-wider text-indigo-700 block mb-1">
+                  {t.restrictedAccess}
                 </span>
                 <h3 className="text-xl font-extrabold text-slate-900 group-hover:text-indigo-700 transition-colors">
-                  Authorized Counsellor
+                  {t.authorizedCounsellor}
                 </h3>
-                <p className="text-xs font-semibold text-slate-500 mt-0.5">
-                  अधिकृत काउंसलर / अधिकारी
-                </p>
               </div>
-
-              <p className="text-xs text-slate-600 leading-relaxed">
-                Secure credential verification, operational jurisdiction assignment (State & District), and real-time AI distress case monitoring dashboard.
+              <p className="text-sm text-slate-600 leading-relaxed max-w-[250px]">
+                {t.counsellorCardDesc}
               </p>
             </div>
 
-            <button
-              type="button"
-              className="w-full py-3 px-4 rounded-2xl bg-indigo-600 group-hover:bg-indigo-700 text-white font-bold text-xs shadow-md shadow-indigo-600/20 transition-all flex items-center justify-center gap-2"
-            >
-              <span>Counsellor Login & Authorization</span>
+            <div className="flex items-center justify-center gap-2 text-white font-bold text-sm bg-indigo-500 shadow-md shadow-indigo-500/20 px-6 py-3 rounded-xl w-fit mx-auto group-hover:bg-indigo-600 transition-all">
               <Lock className="w-4 h-4" />
-            </button>
+              <span>{t.counsellorLoginBtn}</span>
+            </div>
           </motion.div>
 
         </div>
@@ -192,87 +222,23 @@ export const LandingPage: React.FC = () => {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 w-full max-w-3xl pt-4">
           <div className="p-3.5 rounded-2xl bg-white/80 border border-slate-200 flex items-center gap-3 text-xs text-slate-700 shadow-xs">
             <CheckCircle2 className="w-5 h-5 text-emerald-600 flex-shrink-0" />
-            <span><strong>24/7 Tele-MANAS</strong> Helpline Integration</span>
+            <span><strong>24/7 Tele-MANAS</strong> {t.trustBadge1}</span>
           </div>
           <div className="p-3.5 rounded-2xl bg-white/80 border border-slate-200 flex items-center gap-3 text-xs text-slate-700 shadow-xs">
             <Lock className="w-5 h-5 text-indigo-600 flex-shrink-0" />
-            <span><strong>In-Memory JWT</strong> Role Claims</span>
+            <span><strong>In-Memory JWT</strong> {t.trustBadge2}</span>
           </div>
           <div className="p-3.5 rounded-2xl bg-white/80 border border-slate-200 flex items-center gap-3 text-xs text-slate-700 shadow-xs">
             <Sparkles className="w-5 h-5 text-teal-600 flex-shrink-0" />
-            <span><strong>AI Distress Forecast</strong> & Recommendations</span>
+            <span><strong>AI Distress Forecast</strong> {t.trustBadge3}</span>
           </div>
         </div>
 
       </main>
 
-      {/* Language Selection Modal */}
-      <AnimatePresence>
-        {showLanguageModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="w-full max-w-md bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-2xl space-y-6 relative"
-            >
-              <button
-                onClick={() => setShowLanguageModal(false)}
-                className="absolute top-5 right-5 text-slate-400 hover:text-slate-600 p-1"
-              >
-                <X className="w-5 h-5" />
-              </button>
-
-              <div className="text-center space-y-2">
-                <div className="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-700 mx-auto flex items-center justify-center">
-                  <Globe className="w-6 h-6" />
-                </div>
-                <h3 className="text-xl font-extrabold text-slate-900">
-                  Select Language / भाषा चुनें
-                </h3>
-                <p className="text-xs text-slate-600">
-                  Which language are you comfortable using for check-in?
-                </p>
-              </div>
-
-              <div className="space-y-3">
-                <button
-                  onClick={() => handleChooseLanguage('hi')}
-                  className="w-full p-4 rounded-2xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 text-slate-900 font-bold text-sm text-left flex items-center justify-between transition-all group shadow-xs"
-                >
-                  <div className="flex items-center gap-3">
-                    <span className="text-xl">🇮🇳</span>
-                    <div>
-                      <p className="font-extrabold text-emerald-900">हिन्दी (Hindi)</p>
-                      <p className="text-[11px] text-emerald-700">हिन्दी भाषा में चेक-इन जारी रखें</p>
-                    </div>
-                  </div>
-                  <ArrowRight className="w-4 h-4 text-emerald-700 group-hover:translate-x-1 transition-transform" />
-                </button>
-
-                <button
-                  onClick={() => handleChooseLanguage('en')}
-                  className="w-full p-4 rounded-2xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-900 font-bold text-sm text-left flex items-center justify-between transition-all group shadow-xs"
-                >
-                  <div className="flex items-center gap-3">
-                    <span className="text-xl">🌐</span>
-                    <div>
-                      <p className="font-extrabold text-slate-900">English</p>
-                      <p className="text-[11px] text-slate-500">Continue check-in in English</p>
-                    </div>
-                  </div>
-                  <ArrowRight className="w-4 h-4 text-slate-600 group-hover:translate-x-1 transition-transform" />
-                </button>
-              </div>
-
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
-
       {/* Footer */}
       <footer className="py-4 text-center text-xs text-slate-500 border-t border-slate-200 bg-white">
-        SAHAY Portal — Mental Health Support System (Smart India Hackathon 2026)
+        {t.footerText}
       </footer>
     </div>
   );

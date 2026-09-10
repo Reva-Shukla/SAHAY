@@ -28,7 +28,7 @@ export const DistressChart: React.FC<Props> = ({ history }) => {
           <p className="font-extrabold text-slate-900">{data.week} ({data.timestamp})</p>
           <div className="flex items-center gap-2">
             <span className="text-slate-500 font-medium">Distress Score:</span>
-            <span className={`font-extrabold ${data.score >= 70 ? 'text-rose-600' : data.score >= 40 ? 'text-amber-600' : 'text-emerald-600'}`}>
+            <span className={`font-extrabold ${data.score >= 70 ? 'text-rose-600' : data.score >= 40 ? 'text-yellow-600' : 'text-emerald-600'}`}>
               {data.score} / 100
             </span>
           </div>

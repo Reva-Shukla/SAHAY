@@ -6,6 +6,7 @@ import { Navbar } from '../components/Navbar';
 import { MoodSelector } from '../components/MoodSelector';
 import type { MoodType } from '../components/MoodSelector';
 import { VoiceRecorder } from '../components/VoiceRecorder';
+import { CheckInCalendar } from '../components/CheckInCalendar';
 import { submitPatientCheckIn } from '../services/api';
 import { useLanguage } from '../context/LanguageContext';
 
@@ -81,10 +82,16 @@ export const PatientCheckIn: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col justify-between">
-      <Navbar />
+    <div className="min-h-screen bg-gradient-to-br from-[#e6f7f4] via-[#fefae0] to-[#e8f0fe] text-slate-900 flex flex-col justify-between relative overflow-hidden">
+      
+      {/* Soft Ambient Blobs (No leaves) */}
+      <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-emerald-200/30 rounded-full blur-[100px] pointer-events-none"></div>
+      <div className="absolute bottom-0 right-0 w-[600px] h-[600px] bg-indigo-200/30 rounded-full blur-[100px] pointer-events-none"></div>
 
-      {/* Language Switcher Bar & Role Switcher */}
+      <div className="relative z-10 flex flex-col justify-between min-h-screen">
+        <Navbar />
+
+        {/* Language Switcher Bar & Role Switcher */}
       <div className="bg-white/80 border-b border-slate-200 py-2 px-4">
         <div className="max-w-xl mx-auto flex items-center justify-between text-xs">
           <Link
@@ -141,8 +148,7 @@ export const PatientCheckIn: React.FC = () => {
               </p>
             </div>
 
-            {/* Auth Card */}
-            <div className="p-6 sm:p-8 rounded-3xl bg-white border border-slate-200/90 shadow-xl space-y-5">
+            <div className="p-6 sm:p-8 rounded-3xl bg-white/60 backdrop-blur-xl border border-white hover:border-emerald-200 shadow-[0_8px_30px_rgb(0,0,0,0.04)] space-y-5">
               {!otpSent ? (
                 <form onSubmit={handleSendOtp} className="space-y-4">
                   <div>
@@ -247,7 +253,7 @@ export const PatientCheckIn: React.FC = () => {
             </div>
 
             {/* Check-in Form Card */}
-            <form onSubmit={handleSubmitCheckIn} className="p-6 sm:p-8 rounded-3xl bg-white border border-slate-200/90 shadow-xl space-y-6">
+            <form onSubmit={handleSubmitCheckIn} className="p-6 sm:p-8 rounded-3xl bg-white/60 backdrop-blur-xl border border-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] space-y-6">
               
               {/* Mood Selector */}
               <MoodSelector
@@ -264,7 +270,7 @@ export const PatientCheckIn: React.FC = () => {
                   </label>
                   <span className="text-[10px] font-bold text-emerald-700 flex items-center gap-1">
                     <Sparkles className="w-3 h-3 text-emerald-600" />
-                    AI Safeguard
+                    {t.aiSafeguard}
                   </span>
                 </div>
                 <textarea
@@ -316,7 +322,7 @@ export const PatientCheckIn: React.FC = () => {
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="p-8 rounded-3xl bg-white border border-emerald-200 text-center space-y-6 shadow-xl"
+            className="p-8 rounded-3xl bg-white/60 backdrop-blur-xl border border-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] text-center space-y-6"
           >
             <div className="w-16 h-16 rounded-full bg-emerald-100 text-emerald-600 border border-emerald-300 mx-auto flex items-center justify-center">
               <CheckCircle2 className="w-10 h-10" />
@@ -339,26 +345,45 @@ export const PatientCheckIn: React.FC = () => {
               </p>
             </div>
 
-            <button
-              onClick={() => {
-                setStep('CHECKIN');
-                setSelectedMood(null);
-                setJournalText('');
-                setHasVoiceNote(false);
-              }}
-              className="px-6 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold transition-all"
-            >
-              {t.submitAnotherBtn}
-            </button>
+            {/* Action Buttons */}
+            <div className="flex flex-col sm:flex-row items-center gap-3 w-full">
+              <button
+                onClick={() => setStep('CHECKIN')}
+                className="w-full sm:w-1/2 px-6 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold transition-all border border-slate-200"
+              >
+                {t.editCheckIn}
+              </button>
+              <button
+                onClick={() => {
+                  setStep('CHECKIN');
+                  setSelectedMood(null);
+                  setJournalText('');
+                  setHasVoiceNote(false);
+                }}
+                className="w-full sm:w-1/2 px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-all shadow-md shadow-emerald-600/20"
+              >
+                {t.submitAnotherBtn}
+              </button>
+            </div>
+            
+            {/* Calendar */}
+            <CheckInCalendar 
+              currentCheckIn={selectedMood ? { 
+                date: '2026-09-10', 
+                mood: selectedMood, 
+                journal: journalText 
+              } : undefined} 
+            />
           </motion.div>
         )}
 
       </main>
 
       {/* Footer */}
-      <footer className="py-4 text-center text-xs text-slate-500 border-t border-slate-200 bg-white">
+      <footer className="py-4 text-center text-xs text-slate-500 border-t border-slate-200 bg-white/60 backdrop-blur-md">
         SAHAY Portal — Mental Health Support System (Smart India Hackathon 2026)
       </footer>
+      </div>
     </div>
   );
 };

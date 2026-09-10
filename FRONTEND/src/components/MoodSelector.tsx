@@ -1,24 +1,8 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { useLanguage } from './../context/LanguageContext';
 
 export type MoodType = 'Very Low' | 'Low' | 'Neutral' | 'Good' | 'Great';
-
-interface MoodOption {
-  value: MoodType;
-  emoji: string;
-  label: string;
-  color: string;
-  selectedBg: string;
-  desc: string;
-}
-
-const MOODS: MoodOption[] = [
-  { value: 'Very Low', emoji: '🌧️', label: 'Severe Distress', color: 'text-rose-600', selectedBg: 'bg-rose-50 border-rose-400 text-rose-950', desc: 'Feeling overwhelmed or unsafe' },
-  { value: 'Low', emoji: '☁️', label: 'Down / Low', color: 'text-amber-600', selectedBg: 'bg-amber-50 border-amber-400 text-amber-950', desc: 'Feeling sad, tired or anxious' },
-  { value: 'Neutral', emoji: '⛅', label: 'Okay / Neutral', color: 'text-teal-600', selectedBg: 'bg-teal-50 border-teal-400 text-teal-950', desc: 'Just getting through the day' },
-  { value: 'Good', emoji: '🌤️', label: 'Good / Calm', color: 'text-emerald-600', selectedBg: 'bg-emerald-50 border-emerald-400 text-emerald-950', desc: 'Feeling stable and relaxed' },
-  { value: 'Great', emoji: '☀️', label: 'Thriving', color: 'text-cyan-600', selectedBg: 'bg-cyan-50 border-cyan-400 text-cyan-950', desc: 'Feeling joyful and motivated' }
-];
 
 interface Props {
   selectedMood: MoodType | null;
@@ -26,10 +10,20 @@ interface Props {
 }
 
 export const MoodSelector: React.FC<Props> = ({ selectedMood, onSelectMood }) => {
+  const { t } = useLanguage();
+
+  const MOODS = [
+    { value: 'Very Low' as MoodType, emoji: '😫', label: t.mood1Label, color: 'text-rose-600', selectedBg: 'bg-rose-50 border-rose-400 text-rose-950', desc: t.mood1Desc },
+    { value: 'Low' as MoodType, emoji: '😔', label: t.mood2Label, color: 'text-amber-600', selectedBg: 'bg-amber-50 border-amber-400 text-amber-950', desc: t.mood2Desc },
+    { value: 'Neutral' as MoodType, emoji: '😐', label: t.mood3Label, color: 'text-teal-600', selectedBg: 'bg-teal-50 border-teal-400 text-teal-950', desc: t.mood3Desc },
+    { value: 'Good' as MoodType, emoji: '🙂', label: t.mood4Label, color: 'text-emerald-600', selectedBg: 'bg-emerald-50 border-emerald-400 text-emerald-950', desc: t.mood4Desc },
+    { value: 'Great' as MoodType, emoji: '😄', label: t.mood5Label, color: 'text-cyan-600', selectedBg: 'bg-cyan-50 border-cyan-400 text-cyan-950', desc: t.mood5Desc }
+  ];
+
   return (
     <div className="space-y-3">
       <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
-        How are you feeling right now? <span className="text-emerald-600">*</span>
+        {t.moodQuestion} <span className="text-emerald-600">*</span>
       </label>
       
       <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">

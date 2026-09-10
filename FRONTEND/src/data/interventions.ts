@@ -30,10 +30,10 @@ export const INTERVENTION_CATALOG: InterventionRecommendation[] = [
     actionLabel: "Request Shelter Transfer"
   },
 
-  // AMBER RISK INTERVENTIONS
+  // YELLOW RISK INTERVENTIONS
   {
-    id: "INT-AMB-01",
-    riskLevel: "AMBER",
+    id: "INT-YEL-01",
+    riskLevel: "YELLOW",
     title: "Schedule Weekly 1-on-1 Cognitive Therapy Session",
     category: "Counselling",
     description: "Assign assigned district psychiatric counselor for weekly video/audio therapy sessions targeting anxiety and trauma triggers.",
@@ -41,8 +41,8 @@ export const INTERVENTION_CATALOG: InterventionRecommendation[] = [
     actionLabel: "Book Therapy Session"
   },
   {
-    id: "INT-AMB-02",
-    riskLevel: "AMBER",
+    id: "INT-YEL-02",
+    riskLevel: "YELLOW",
     title: "Apply for MoSJE Distress Financial Assistance Scheme",
     category: "Financial Assistance",
     description: "Fast-track application for government financial support scheme for victims facing severe economic hardship.",
@@ -62,6 +62,6 @@ export const INTERVENTION_CATALOG: InterventionRecommendation[] = [
   }
 ];
 
-export const getInterventionsForRisk = (riskLevel: 'GREEN' | 'AMBER' | 'RED'): InterventionRecommendation[] => {
+export const getInterventionsForRisk = (riskLevel: 'GREEN' | 'YELLOW' | 'RED'): InterventionRecommendation[] => {
   return INTERVENTION_CATALOG.filter(item => item.riskLevel === riskLevel);
 };

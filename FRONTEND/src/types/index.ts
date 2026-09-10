@@ -1,4 +1,4 @@
-export type RiskLevel = 'GREEN' | 'AMBER' | 'RED';
+export type RiskLevel = 'GREEN' | 'YELLOW' | 'RED';
 
 export interface DistressHistoryEntry {
   week: string;

@@ -9,6 +9,7 @@ import { PatientCheckIn } from './pages/PatientCheckIn';
 import { CounsellorLogin } from './pages/CounsellorLogin';
 import { CounsellorDashboard } from './pages/CounsellorDashboard';
 import { NotFound } from './pages/NotFound';
+import { LanguagePopup } from './components/LanguagePopup';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -24,6 +25,7 @@ export const App: React.FC = () => {
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <LanguageProvider>
+          <LanguagePopup />
           <BrowserRouter>
             <Routes>
               {/* Root Landing Page: Role Gate Selection (Patient vs Counsellor) & Language Choice */}

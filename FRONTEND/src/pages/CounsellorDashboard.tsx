@@ -82,10 +82,16 @@ export const CounsellorDashboard: React.FC = () => {
   });
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col">
-      <Navbar highRiskCount={highRiskCount} />
+    <div className="min-h-screen bg-gradient-to-br from-[#e6f7f4] via-[#fefae0] to-[#e8f0fe] text-slate-900 flex flex-col relative overflow-hidden">
+      
+      {/* Soft Ambient Blobs (No leaves) */}
+      <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-emerald-200/30 rounded-full blur-[100px] pointer-events-none"></div>
+      <div className="absolute bottom-0 right-0 w-[600px] h-[600px] bg-indigo-200/30 rounded-full blur-[100px] pointer-events-none"></div>
+      
+      <div className="relative z-10 flex flex-col min-h-screen">
+        <Navbar highRiskCount={highRiskCount} />
 
-      <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
         
         {/* ========================================================================= */}
         {/* LEFT SIDEBAR: Jurisdiction Patient List */}
@@ -93,7 +99,7 @@ export const CounsellorDashboard: React.FC = () => {
         <aside className="lg:col-span-4 xl:col-span-4 flex flex-col space-y-4">
           
           {/* Jurisdiction Header Banner */}
-          <div className="p-4 rounded-2xl bg-white border border-slate-200 space-y-2 shadow-xs">
+          <div className="p-4 rounded-2xl bg-white/60 backdrop-blur-xl border border-white space-y-2 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
             <div className="flex items-center justify-between">
               <span className="text-[11px] font-bold uppercase tracking-wider text-indigo-600 flex items-center gap-1.5">
                 <MapPin className="w-3.5 h-3.5" />
@@ -131,8 +137,8 @@ export const CounsellorDashboard: React.FC = () => {
             </div>
 
             {/* Risk Category Tabs */}
-            <div className="flex gap-1 bg-white p-1 rounded-xl border border-slate-200 text-[11px] shadow-xs">
-              {(['ALL', 'RED', 'AMBER', 'GREEN'] as const).map((lvl) => (
+            <div className="flex gap-1 bg-white/60 backdrop-blur-xl p-1 rounded-xl border border-white text-[11px] shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+              {(['ALL', 'RED', 'YELLOW', 'GREEN'] as const).map((lvl) => (
                 <button
                   key={lvl}
                   onClick={() => setRiskFilter(lvl)}
@@ -140,8 +146,8 @@ export const CounsellorDashboard: React.FC = () => {
                     riskFilter === lvl
                       ? lvl === 'RED'
                         ? 'bg-rose-100 text-rose-800 border border-rose-200'
-                        : lvl === 'AMBER'
-                        ? 'bg-amber-100 text-amber-800 border border-amber-200'
+                        : lvl === 'YELLOW'
+                        ? 'bg-yellow-100 text-yellow-800 border border-yellow-200'
                         : lvl === 'GREEN'
                         ? 'bg-emerald-100 text-emerald-800 border border-emerald-200'
                         : 'bg-indigo-600 text-white shadow-xs'
@@ -180,7 +186,7 @@ export const CounsellorDashboard: React.FC = () => {
                     className={`p-3.5 rounded-2xl border transition-all cursor-pointer relative overflow-hidden shadow-xs ${
                       isSelected
                         ? 'bg-indigo-50/70 border-indigo-500 shadow-md ring-1 ring-indigo-500/20'
-                        : 'bg-white border-slate-200/90 hover:border-slate-300'
+                        : 'bg-white/60 backdrop-blur-xl border-white hover:border-indigo-300'
                     } ${isRed ? 'animate-pulse-red' : ''}`}
                   >
                     {/* Left Priority Accent Stripe */}
@@ -188,8 +194,8 @@ export const CounsellorDashboard: React.FC = () => {
                       className={`absolute left-0 top-0 bottom-0 w-1.5 ${
                         c.riskLevel === 'RED'
                           ? 'bg-rose-500'
-                          : c.riskLevel === 'AMBER'
-                          ? 'bg-amber-500'
+                          : c.riskLevel === 'YELLOW'
+                          ? 'bg-yellow-500'
                           : 'bg-emerald-500'
                       }`}
                     />
@@ -206,8 +212,8 @@ export const CounsellorDashboard: React.FC = () => {
                           className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase ${
                             c.riskLevel === 'RED'
                               ? 'bg-rose-100 text-rose-800 border border-rose-200'
-                              : c.riskLevel === 'AMBER'
-                              ? 'bg-amber-100 text-amber-800 border border-amber-200'
+                              : c.riskLevel === 'YELLOW'
+                              ? 'bg-yellow-100 text-yellow-800 border border-yellow-200'
                               : 'bg-emerald-100 text-emerald-800 border border-emerald-200'
                           }`}
                         >
@@ -219,7 +225,7 @@ export const CounsellorDashboard: React.FC = () => {
                         <span>{c.age} yrs • {c.gender}</span>
                         <div className="flex items-center gap-1">
                           <Activity className="w-3 h-3 text-indigo-600" />
-                          <span className={`font-bold ${c.currentScore >= 70 ? 'text-rose-600' : c.currentScore >= 40 ? 'text-amber-600' : 'text-emerald-600'}`}>
+                          <span className={`font-bold ${c.currentScore >= 70 ? 'text-rose-600' : c.currentScore >= 40 ? 'text-yellow-600' : 'text-emerald-600'}`}>
                             Distress: {c.currentScore}
                           </span>
                         </div>
@@ -263,7 +269,7 @@ export const CounsellorDashboard: React.FC = () => {
               >
                 
                 {/* Case Top Overview Header Card */}
-                <div className="p-5 sm:p-6 rounded-3xl bg-white border border-slate-200/90 shadow-xl space-y-4">
+                <div className="p-5 sm:p-6 rounded-3xl bg-white/60 backdrop-blur-xl border border-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] space-y-4">
                   <div className="flex flex-wrap items-start justify-between gap-4">
                     
                     <div className="space-y-1">
@@ -277,8 +283,8 @@ export const CounsellorDashboard: React.FC = () => {
                         <span className={`text-xs px-3 py-1 rounded-full font-bold uppercase ${
                           selectedCase.riskLevel === 'RED'
                             ? 'bg-rose-100 text-rose-800 border border-rose-200'
-                            : selectedCase.riskLevel === 'AMBER'
-                            ? 'bg-amber-100 text-amber-800 border border-amber-200'
+                            : selectedCase.riskLevel === 'YELLOW'
+                            ? 'bg-yellow-100 text-yellow-800 border border-yellow-200'
                             : 'bg-emerald-100 text-emerald-800 border border-emerald-200'
                         }`}>
                           {selectedCase.riskLevel} Priority Protocol
@@ -310,7 +316,7 @@ export const CounsellorDashboard: React.FC = () => {
                           selectedCase.currentScore >= 70
                             ? 'text-rose-600'
                             : selectedCase.currentScore >= 40
-                            ? 'text-amber-600'
+                            ? 'text-yellow-600'
                             : 'text-emerald-600'
                         }`}
                       >
@@ -337,7 +343,7 @@ export const CounsellorDashboard: React.FC = () => {
                 </div>
 
                 {/* Distress History Recharts Graph */}
-                <div className="p-5 sm:p-6 rounded-3xl bg-white border border-slate-200/90 shadow-xl space-y-3">
+                <div className="p-5 sm:p-6 rounded-3xl bg-white/60 backdrop-blur-xl border border-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] space-y-3">
                   <div className="flex items-center justify-between">
                     <div>
                       <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
@@ -358,7 +364,7 @@ export const CounsellorDashboard: React.FC = () => {
                 </div>
 
                 {/* AI Intervention Recommendations Panel */}
-                <div className="p-5 sm:p-6 rounded-3xl bg-white border border-slate-200/90 shadow-xl">
+                <div className="p-5 sm:p-6 rounded-3xl bg-white/60 backdrop-blur-xl border border-white shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
                   <InterventionPanel
                     recommendations={recommendations}
                     patientId={selectedCase.id}
@@ -376,6 +382,7 @@ export const CounsellorDashboard: React.FC = () => {
         </section>
 
       </main>
+      </div>
     </div>
   );
 };
