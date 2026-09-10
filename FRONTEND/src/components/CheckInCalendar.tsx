@@ -45,7 +45,7 @@ interface Props {
 }
 
 export const CheckInCalendar: React.FC<Props> = ({ currentCheckIn }) => {
-  const [currentDate] = useState(new Date(2026, 8, 10)); // Sept 10, 2026
+  const [currentDate, setCurrentDate] = useState(new Date(2026, 8, 10)); // Sept 10, 2026
   const [selectedDay, setSelectedDay] = useState<PastCheckIn | null>(null);
 
   // Combine mock history with current check-in if provided
@@ -83,17 +83,35 @@ export const CheckInCalendar: React.FC<Props> = ({ currentCheckIn }) => {
     else setSelectedDay(null);
   };
 
+  const changeMonth = (offset: number) => {
+    const nextMonth = month + offset;
+    if (nextMonth < 0 || nextMonth > 11) return;
+    setCurrentDate(new Date(year, nextMonth, 10));
+  };
+
+  const streak = allHistory.length;
+
   return (
-    <div className="mt-8 bg-slate-900 rounded-3xl p-6 shadow-2xl text-slate-100 max-w-sm mx-auto relative overflow-hidden">
+    <div className="mt-8 bg-[#f8faf7]/90 backdrop-blur-xl rounded-3xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.08)] border border-white text-slate-900 max-w-sm mx-auto relative overflow-hidden">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
-        <button className="p-1 hover:bg-slate-800 rounded-lg transition-colors">
+        <button
+          onClick={() => changeMonth(-1)}
+          disabled={month === 0}
+          aria-label="Previous month"
+          className="p-1 hover:bg-indigo-50 text-slate-500 hover:text-indigo-700 rounded-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+        >
           <ChevronLeft className="w-5 h-5" />
         </button>
         <h3 className="font-mono text-sm font-bold tracking-widest uppercase">
           {monthNames[month]} {year}
         </h3>
-        <button className="p-1 hover:bg-slate-800 rounded-lg transition-colors">
+        <button
+          onClick={() => changeMonth(1)}
+          disabled={month === 11}
+          aria-label="Next month"
+          className="p-1 hover:bg-indigo-50 text-slate-500 hover:text-indigo-700 rounded-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+        >
           <ChevronRight className="w-5 h-5" />
         </button>
       </div>
@@ -101,7 +119,7 @@ export const CheckInCalendar: React.FC<Props> = ({ currentCheckIn }) => {
       {/* Weekdays */}
       <div className="grid grid-cols-7 gap-1 mb-2 text-center">
         {['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'].map(day => (
-          <div key={day} className="text-[10px] font-bold text-slate-500 uppercase tracking-tighter">
+          <div key={day} className="text-[10px] font-bold text-indigo-500 uppercase tracking-tighter">
             {day}
           </div>
         ))}
@@ -122,14 +140,14 @@ export const CheckInCalendar: React.FC<Props> = ({ currentCheckIn }) => {
               onClick={() => handleDayClick(day)}
               className={`flex flex-col items-center gap-1 cursor-pointer group ${entry ? 'hover:scale-110 transition-transform' : ''}`}
             >
-              <span className={`text-xs font-mono ${entry ? 'text-slate-300' : 'text-slate-600'}`}>
+              <span className={`text-xs font-mono ${entry ? 'text-slate-700' : 'text-slate-400'}`}>
                 {day}
               </span>
               <div className="h-6 flex items-center justify-center">
                 {entry ? (
                   <span className="text-lg group-hover:animate-bounce">{getMoodEmoji(entry.mood)}</span>
                 ) : (
-                  <span className="text-slate-800 text-[10px]">-</span>
+                  <span className="text-slate-300 text-[10px]">-</span>
                 )}
               </div>
             </div>
@@ -138,9 +156,9 @@ export const CheckInCalendar: React.FC<Props> = ({ currentCheckIn }) => {
       </div>
 
       {/* Bottom info section */}
-      <div className="mt-8 pt-4 border-t border-slate-800 border-dashed text-center space-y-4">
-        <p className="font-mono text-xs text-slate-400">TODAY — {monthNames[month]} 10</p>
-        <div className="text-sm font-medium text-slate-300">Daily check-in streak: <span className="text-emerald-400 font-bold">12 Days 🔥</span></div>
+      <div className="mt-8 pt-4 border-t border-slate-200 border-dashed text-center space-y-4">
+        <p className="font-mono text-xs text-slate-500">TODAY — September 10, 2026</p>
+        <div className="text-sm font-medium text-slate-700">Daily check-in streak: <span className="text-emerald-600 font-bold">{streak} {streak === 1 ? 'Day' : 'Days'} 🔥</span></div>
       </div>
 
       {/* Day Detail Modal */}
@@ -151,16 +169,16 @@ export const CheckInCalendar: React.FC<Props> = ({ currentCheckIn }) => {
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
             transition={{ type: "spring", damping: 25, stiffness: 200 }}
-            className="absolute inset-0 bg-slate-900 z-50 flex flex-col"
+            className="absolute inset-0 bg-[#fbfcf9]/95 backdrop-blur-xl z-50 flex flex-col text-slate-900"
           >
             {/* Modal Header */}
-            <div className="p-5 flex items-center justify-between border-b border-slate-800">
-              <span className="font-mono text-xs text-slate-400 uppercase tracking-widest">
+            <div className="p-5 flex items-center justify-between border-b border-slate-200">
+              <span className="font-mono text-xs text-indigo-600 uppercase tracking-widest">
                 {new Date(selectedDay.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
               </span>
               <button 
                 onClick={() => setSelectedDay(null)}
-                className="p-1 hover:bg-slate-800 rounded-full text-slate-400 hover:text-white transition-colors"
+                className="p-1 hover:bg-indigo-50 rounded-full text-slate-400 hover:text-indigo-700 transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -172,52 +190,52 @@ export const CheckInCalendar: React.FC<Props> = ({ currentCheckIn }) => {
               <div className="flex items-center gap-4">
                 <span className="text-4xl">{getMoodEmoji(selectedDay.mood)}</span>
                 <div>
-                  <div className="text-xs text-slate-500 font-mono uppercase mb-1">Mood</div>
-                  <div className="text-lg font-bold text-slate-100">{selectedDay.mood}</div>
+                  <div className="text-xs text-indigo-500 font-mono uppercase mb-1">Mood</div>
+                  <div className="text-lg font-bold text-slate-900">{selectedDay.mood}</div>
                 </div>
               </div>
 
               {/* Journal */}
               {selectedDay.journal && (
                 <div className="space-y-2">
-                  <div className="text-xs text-slate-500 font-mono uppercase flex items-center gap-2">
+                  <div className="text-xs text-indigo-500 font-mono uppercase flex items-center gap-2">
                     <Smile className="w-3.5 h-3.5" /> Journal
                   </div>
-                  <p className="text-sm text-slate-300 italic border-l-2 border-slate-700 pl-3">
+                  <p className="text-sm text-slate-700 italic border-l-2 border-emerald-400 pl-3">
                     "{selectedDay.journal}"
                   </p>
                 </div>
               )}
 
               {/* Stats */}
-              <div className="space-y-4 pt-4 border-t border-slate-800">
+              <div className="space-y-4 pt-4 border-t border-slate-200">
                 <div className="flex items-center justify-between">
-                  <div className="text-xs text-slate-400 font-mono flex items-center gap-2">
+                  <div className="text-xs text-slate-600 font-mono flex items-center gap-2">
                     <Zap className="w-3.5 h-3.5" /> Energy
                   </div>
                   <div className="flex gap-1">
                     {Array.from({ length: 10 }).map((_, i) => (
-                      <div key={i} className={`w-3 h-3 rounded-sm ${i < selectedDay.energy ? 'bg-amber-400' : 'bg-slate-800'}`} />
+                      <div key={i} className={`w-3 h-3 rounded-sm ${i < selectedDay.energy ? 'bg-amber-400' : 'bg-slate-200'}`} />
                     ))}
                   </div>
                 </div>
 
                 <div className="flex items-center justify-between">
-                  <div className="text-xs text-slate-400 font-mono flex items-center gap-2">
+                  <div className="text-xs text-slate-600 font-mono flex items-center gap-2">
                     <Activity className="w-3.5 h-3.5" /> Stress
                   </div>
                   <div className="flex gap-1">
                     {Array.from({ length: 10 }).map((_, i) => (
-                      <div key={i} className={`w-3 h-3 rounded-sm ${i < selectedDay.stress ? 'bg-rose-500' : 'bg-slate-800'}`} />
+                      <div key={i} className={`w-3 h-3 rounded-sm ${i < selectedDay.stress ? 'bg-rose-500' : 'bg-slate-200'}`} />
                     ))}
                   </div>
                 </div>
 
                 <div className="flex items-center justify-between">
-                  <div className="text-xs text-slate-400 font-mono flex items-center gap-2">
+                  <div className="text-xs text-slate-600 font-mono flex items-center gap-2">
                     <Moon className="w-3.5 h-3.5" /> Sleep
                   </div>
-                  <div className="text-sm font-bold text-slate-200 font-mono">
+                  <div className="text-sm font-bold text-slate-800 font-mono">
                     {selectedDay.sleep}
                   </div>
                 </div>

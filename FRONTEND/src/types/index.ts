@@ -28,6 +28,8 @@ export interface PatientCase {
   contactStatus: 'Uncontacted' | 'In Touch' | 'Crisis Intervention Active' | 'Resolved';
   voiceSentimentScore?: number; // 0 to 1 scale
   checkInCount: number;
+  preferredLanguage?: string;
+  currentMood?: DistressHistoryEntry['mood'];
 }
 
 export interface AuthorisedCounsellor {
@@ -38,6 +40,9 @@ export interface AuthorisedCounsellor {
   department: string;
   designation: string;
   badge: string;
+  languages?: string[];
+  specialization?: string;
+  availability?: string;
 }
 
 export interface CounsellorSession {
@@ -49,6 +54,33 @@ export interface CounsellorSession {
   assignedState: string;
   assignedDistrict: string;
   loginTimestamp: string;
+  verificationStatus?: 'VERIFIED';
+  languages?: string[];
+  specialization?: string;
+  availability?: string;
+}
+
+export type SessionStatus = 'Scheduled' | 'Completed' | 'Cancelled' | 'In progress';
+
+export interface CounsellingSessionRecord {
+  id: string;
+  caseId: string;
+  date: string;
+  sessionType: string;
+  duration: string;
+  status: SessionStatus;
+  topic: string;
+  notesSummary: string;
+  followUpStatus: string;
+  details: string;
+}
+
+export interface CounsellorNote {
+  id: string;
+  caseId: string;
+  text: string;
+  createdAt: string;
+  updatedAt?: string;
 }
 
 export interface InterventionRecommendation {

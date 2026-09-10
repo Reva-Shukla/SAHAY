@@ -8,7 +8,10 @@ import {
   Activity,
   FileText,
   MapPin,
-  RefreshCw
+  RefreshCw,
+  Play,
+  Square,
+  CalendarClock
 } from 'lucide-react';
 import { useAuth } from '../auth/AuthContext';
 import { fetchCasesByJurisdiction, fetchCaseRecommendations } from '../services/api';
@@ -18,6 +21,11 @@ import { DistressChart } from '../components/DistressChart';
 import { InterventionPanel } from '../components/InterventionPanel';
 import { AuditBadge } from '../components/AuditBadge';
 import { SidebarSkeleton, ChartSkeleton } from '../components/LoadingSkeleton';
+import { SessionHistory } from '../components/SessionHistory';
+import { CounsellorNotes } from '../components/CounsellorNotes';
+import { TeleManasPanel } from '../components/TeleManasPanel';
+import { EscalationModal } from '../components/EscalationModal';
+import { getSessionHistory } from '../data/counsellorSupport';
 
 export const CounsellorDashboard: React.FC = () => {
   const { session, logAuditAction } = useAuth();
@@ -26,6 +34,10 @@ export const CounsellorDashboard: React.FC = () => {
   const [selectedCaseId, setSelectedCaseId] = useState<string | null>(null);
   const [riskFilter, setRiskFilter] = useState<'ALL' | RiskLevel>('ALL');
   const [searchQuery, setSearchQuery] = useState('');
+  const [isSessionActive, setIsSessionActive] = useState(false);
+  const [sessionSeconds, setSessionSeconds] = useState(0);
+  const [isEscalationOpen, setIsEscalationOpen] = useState(false);
+  const [notice, setNotice] = useState('');
 
   // Fetch jurisdiction-filtered patient cases via TanStack Query
   const {
@@ -61,6 +73,17 @@ export const CounsellorDashboard: React.FC = () => {
   // Selected case entity
   const selectedCase = cases.find((c) => c.id === selectedCaseId) || cases[0];
 
+  useEffect(() => {
+    if (!isSessionActive) return;
+    const timer = window.setInterval(() => setSessionSeconds((seconds) => seconds + 1), 1000);
+    return () => window.clearInterval(timer);
+  }, [isSessionActive]);
+
+  useEffect(() => {
+    setIsSessionActive(false);
+    setSessionSeconds(0);
+  }, [selectedCaseId]);
+
   // Fetch interventions for selected case risk level
   const { data: recommendations = [] } = useQuery({
     queryKey: ['recommendations', selectedCase?.riskLevel],
@@ -70,6 +93,14 @@ export const CounsellorDashboard: React.FC = () => {
 
   // High risk red cases count for header notification bell
   const highRiskCount = cases.filter((c) => c.riskLevel === 'RED').length;
+
+  const formatDuration = (seconds: number) => `${Math.floor(seconds / 60).toString().padStart(2, '0')}:${(seconds % 60).toString().padStart(2, '0')}`;
+  const handleEndSession = () => {
+    if (!window.confirm('End this active counselling session?')) return;
+    setIsSessionActive(false);
+    logAuditAction('SESSION_ENDED', `Counsellor ended active session for ${selectedCase?.id || 'unknown case'}`, selectedCase?.id);
+    setNotice('Session ended and recorded locally for this demonstration.');
+  };
 
   // Filtered case list based on search and risk filter tabs
   const filteredCases = cases.filter((c) => {
@@ -340,6 +371,24 @@ export const CounsellorDashboard: React.FC = () => {
                       {selectedCase.clinicalSummary}
                     </p>
                   </div>
+
+                  {/* Patient context additions */}
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px]">
+                    <div className="rounded-xl bg-white border border-slate-200 p-3"><span className="block text-slate-500">Preferred language</span><strong>{selectedCase.preferredLanguage || 'Hindi / English'}</strong></div>
+                    <div className="rounded-xl bg-white border border-slate-200 p-3"><span className="block text-slate-500">Current mood</span><strong>{selectedCase.currentMood || selectedCase.distressHistory[selectedCase.distressHistory.length - 1]?.mood || 'Not recorded'}</strong></div>
+                    <div className="rounded-xl bg-white border border-slate-200 p-3"><span className="block text-slate-500">Recent sessions</span><strong>{selectedCase.checkInCount}</strong></div>
+                    <div className="rounded-xl bg-white border border-slate-200 p-3"><span className="block text-slate-500">Primary triggers</span><strong>{selectedCase.primaryTriggers.slice(0, 2).join(', ')}</strong></div>
+                  </div>
+                </div>
+
+                {/* Current / upcoming session */}
+                <div className="p-5 sm:p-6 rounded-3xl bg-white/60 backdrop-blur-xl border border-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] space-y-3">
+                  <div className="flex items-center gap-2"><CalendarClock className="w-4 h-4 text-indigo-600" /><h3 className="text-xs font-bold uppercase tracking-wider text-slate-800">Current / Upcoming Session</h3></div>
+                  <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-slate-50 border border-slate-200 p-3 text-xs">
+                    <div><strong className="block text-slate-900">Support check-in</strong><span className="text-slate-500">Today, 4:30 PM • {selectedCase.patientAlias}</span><span className="block text-emerald-700 font-semibold">Scheduled</span></div>
+                    {isSessionActive ? <div className="flex items-center gap-2"><span className="font-mono font-bold text-indigo-700">{formatDuration(sessionSeconds)}</span><button type="button" onClick={handleEndSession} className="inline-flex items-center gap-1 rounded-xl bg-rose-600 px-3 py-2 text-[11px] font-bold text-white"><Square className="w-3 h-3" />End Session</button></div> : <button type="button" onClick={() => { setIsSessionActive(true); logAuditAction('SESSION_STARTED', `Counsellor started session for ${selectedCase.id}`, selectedCase.id); }} className="inline-flex items-center gap-1 rounded-xl bg-indigo-600 px-3 py-2 text-[11px] font-bold text-white"><Play className="w-3 h-3" />Start Session</button>}
+                  </div>
+                  {notice && <p className="text-xs text-emerald-700">{notice}</p>}
                 </div>
 
                 {/* Distress History Recharts Graph */}
@@ -372,8 +421,16 @@ export const CounsellorDashboard: React.FC = () => {
                   />
                 </div>
 
+                <SessionHistory sessions={getSessionHistory(selectedCase)} />
+                <CounsellorNotes caseId={selectedCase.id} />
+                <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+                  <TeleManasPanel onConnect={() => setNotice('Tele-MANAS connection is ready for backend integration and has not been initiated.')} />
+                  {selectedCase.riskLevel === 'RED' && <div className="p-5 rounded-3xl bg-rose-50/80 border border-rose-200 space-y-3"><h3 className="text-xs font-bold uppercase tracking-wider text-rose-900">High-risk case</h3><p className="text-xs text-rose-800">This case is currently RED. Escalation requires a documented note and confirmation.</p><button type="button" onClick={() => setIsEscalationOpen(true)} className="rounded-xl bg-rose-600 px-3 py-2 text-xs font-bold text-white hover:bg-rose-700">Escalate Case</button></div>}
+                </div>
+
                 {/* Accountability Audit Badge */}
                 <AuditBadge caseId={selectedCase.id} />
+                <EscalationModal open={isEscalationOpen} caseId={selectedCase.id} riskLevel={selectedCase.riskLevel} onClose={() => setIsEscalationOpen(false)} onConfirm={(note) => { logAuditAction('CASE_ESCALATED', note, selectedCase.id, 'FLAGGED'); setIsEscalationOpen(false); setNotice('Escalation note recorded in the audit trail.'); }} />
 
               </motion.div>
             </AnimatePresence>

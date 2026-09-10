@@ -34,12 +34,7 @@ export const CounsellorLogin: React.FC = () => {
   // Handle State Change to reset District dropdown
   const handleStateChange = (stateName: string) => {
     setSelectedState(stateName);
-    const districts = getStateDistricts(stateName);
-    if (districts.length > 0) {
-      setSelectedDistrict(districts[0]);
-    } else {
-      setSelectedDistrict('');
-    }
+    setSelectedDistrict('');
   };
 
   // Step 1: Login Submission
@@ -304,6 +299,7 @@ export const CounsellorLogin: React.FC = () => {
                     onChange={(e) => handleStateChange(e.target.value)}
                     className="w-full px-4 py-2.5 rounded-2xl bg-slate-50 border border-slate-200 text-slate-900 text-sm focus:outline-none focus:border-indigo-500"
                   >
+                    <option value="">Select State / UT</option>
                     {INDIAN_STATES_DISTRICTS.map((s) => (
                       <option key={s.state} value={s.state}>
                         {s.state}
@@ -323,6 +319,7 @@ export const CounsellorLogin: React.FC = () => {
                     onChange={(e) => setSelectedDistrict(e.target.value)}
                     className="w-full px-4 py-2.5 rounded-2xl bg-slate-50 border border-slate-200 text-slate-900 text-sm focus:outline-none focus:border-indigo-500"
                   >
+                    <option value="">Select City / District</option>
                     {getStateDistricts(selectedState).map((d) => (
                       <option key={d} value={d}>
                         {d}

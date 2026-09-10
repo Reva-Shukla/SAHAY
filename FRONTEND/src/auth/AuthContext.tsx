@@ -107,7 +107,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       designation: pendingCounsellor.designation,
       assignedState,
       assignedDistrict,
-      loginTimestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      loginTimestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      verificationStatus: 'VERIFIED',
+      languages: pendingCounsellor.languages || ['English', 'Hindi'],
+      specialization: pendingCounsellor.specialization || pendingCounsellor.designation,
+      availability: pendingCounsellor.availability || 'Assigned availability'
     };
 
     setSession(newSession);

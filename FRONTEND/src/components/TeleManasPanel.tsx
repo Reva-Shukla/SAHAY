@@ -1,0 +1,4 @@
+import React from 'react';
+import { Headphones, ArrowUpRight } from 'lucide-react';
+
+export const TeleManasPanel: React.FC<{ onConnect?: () => void }> = ({ onConnect }) => <section className="p-5 rounded-3xl bg-indigo-50/80 border border-indigo-200 space-y-3"><div className="flex items-center gap-2"><Headphones className="w-4 h-4 text-indigo-700" /><h3 className="text-xs font-bold uppercase tracking-wider text-indigo-900">Tele-MANAS Support</h3></div><p className="text-xs text-indigo-900">Integrated mental-health support pathway. This interface is ready for a verified backend connection; no live Tele-MANAS API is connected in this frontend.</p><button type="button" onClick={onConnect} className="inline-flex items-center gap-2 rounded-xl bg-indigo-700 px-3 py-2 text-xs font-bold text-white hover:bg-indigo-800">Escalate / Connect<ArrowUpRight className="w-3.5 h-3.5" /></button></section>;

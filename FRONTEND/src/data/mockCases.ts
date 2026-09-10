@@ -206,14 +206,14 @@ export const MOCK_PATIENT_CASES: PatientCase[] = [
     ]
   },
 
-  // HARYANA - GURGAON (3 cases)
+  // HARYANA - GURUGRAM (3 cases)
   {
     id: "Case #5102",
     patientAlias: "Victim HG-01",
     age: 26,
     gender: "Female",
     state: "Haryana",
-    district: "Gurgaon",
+    district: "Gurugram",
     riskLevel: "RED",
     currentScore: 89,
     previousScore: 76,
@@ -237,7 +237,7 @@ export const MOCK_PATIENT_CASES: PatientCase[] = [
     age: 33,
     gender: "Male",
     state: "Haryana",
-    district: "Gurgaon",
+    district: "Gurugram",
     riskLevel: "YELLOW",
     currentScore: 58,
     previousScore: 61,
@@ -260,7 +260,7 @@ export const MOCK_PATIENT_CASES: PatientCase[] = [
     age: 22,
     gender: "Female",
     state: "Haryana",
-    district: "Gurgaon",
+    district: "Gurugram",
     riskLevel: "GREEN",
     currentScore: 22,
     previousScore: 25,
