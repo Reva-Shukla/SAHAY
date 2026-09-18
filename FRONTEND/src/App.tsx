@@ -8,6 +8,7 @@ import { LandingPage } from './pages/LandingPage';
 import { PatientCheckIn } from './pages/PatientCheckIn';
 import { CounsellorLogin } from './pages/CounsellorLogin';
 import { CounsellorDashboard } from './pages/CounsellorDashboard';
+import { PatientDashboard } from './pages/PatientDashboard';
 import { NotFound } from './pages/NotFound';
 import { LanguagePopup } from './components/LanguagePopup';
 
@@ -33,6 +34,7 @@ export const App: React.FC = () => {
               
               {/* Patient & Caretaker Portal */}
               <Route path="/patient" element={<PatientCheckIn />} />
+              <Route path="/patient/dashboard" element={<PatientDashboard />} />
 
               {/* Counsellor Login & Jurisdiction Gate */}
               <Route path="/counsellor/login" element={<CounsellorLogin />} />

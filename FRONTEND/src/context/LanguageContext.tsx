@@ -89,6 +89,100 @@ interface Translations {
   mood5Desc: string;
   aiSafeguard: string;
   editCheckIn: string;
+  viewDashboardBtn: string;
+  // Dashboard specific
+  dashNavDashboard: string;
+  dashNavCalendar: string;
+  dashNavInsights: string;
+  dashNavScheduled: string;
+  dashNavGoals: string;
+  dashNavCounselor: string;
+  dashNavSupport: string;
+  dashNavProfile: string;
+  dashSearchPlaceholder: string;
+  dashBannerTitle: string;
+  dashBannerSub: string;
+  dashBannerBtn: string;
+  dashMoodChartTitle: string;
+  dashMoodChartSub: string;
+  dashDailyGoals: string;
+  dashChecklistTitle: string;
+  dashCoreRoutines: string;
+  dashReadingTitle: string;
+  dashYogaTitle: string;
+  dashCheckInHistory: string;
+  dashCheckInHistorySub: string;
+  dashInsightsTitle: string;
+  dashInsightsSub: string;
+  dashScheduledTitle: string;
+  dashScheduledSub: string;
+  dashTasksCompleted: string;
+  dashNoteTimers: string;
+  dashViewAll: string;
+  dashEnergyVsMood: string;
+  dashEnergyVsMoodDesc: string;
+  dashRecurringPatterns: string;
+  dashRecurringPatternsDesc: string;
+  dash30DayTrend: string;
+  dashPastMonth: string;
+  dashTopTriggers: string;
+  dashTopTriggersDesc: string;
+  dashGoalsSub: string;
+  dashGoalsGreat: string;
+  dashOutOf: string;
+  goalWater: string;
+  goalMeds: string;
+  goalWalk: string;
+  goalJournal: string;
+  
+  counselorCenter: string;
+  counselorCenterSub: string;
+  counselorAvailable: string;
+  counselorRole: string;
+  viewProfileBtn: string;
+  recommendationsTitle: string;
+  tasksBadge: string;
+  chatTitle: string;
+  privateBadge: string;
+  shareLogsBtn: string;
+  typeMessagePlaceholder: string;
+  appointmentsTitle: string;
+  upcomingBadge: string;
+  pastBadge: string;
+  rescheduleBtn: string;
+  cancelBtn: string;
+  reportTitle: string;
+  reportSub: string;
+  startDate: string;
+  endDate: string;
+  includeInReport: string;
+  moodSummary: string;
+  sleepData: string;
+  triggersStr: string;
+  activitiesStr: string;
+  includeJournal: string;
+  generateReportBtn: string;
+  reportPreview: string;
+  editBtn: string;
+  periodLabel: string;
+  recentLabel: string;
+  todayLabel: string;
+  shareBtn: string;
+  downloadBtn: string;
+  rescheduleTitle: string;
+  cancelTitle: string;
+  keepItBtn: string;
+  yesCancelBtn: string;
+  confirmBtn: string;
+  shareLogsTitle: string;
+  shareLogsSub: string;
+  shareSelectedBtn: string;
+  rec1Title: string;
+  rec1Desc: string;
+  rec1Date: string;
+  rec2Title: string;
+  rec2Desc: string;
+  rec2Date: string;
 }
 
 const TRANSLATIONS: Record<SupportedLanguage, Translations> = {
@@ -177,7 +271,99 @@ const TRANSLATIONS: Record<SupportedLanguage, Translations> = {
     mood5Label: "Thriving",
     mood5Desc: "Feeling joyful and motivated",
     aiSafeguard: "AI Safeguard",
-    editCheckIn: "Edit Check-in"
+    editCheckIn: "Edit Check-in",
+    viewDashboardBtn: "View Dashboard",
+    dashNavDashboard: "Dashboard",
+    dashNavCalendar: "Calendar",
+    dashNavInsights: "Mood Insights",
+    dashNavScheduled: "Scheduled",
+    dashNavGoals: "Goals",
+    dashNavCounselor: "Counselor",
+    dashNavSupport: "Support",
+    dashNavProfile: "Profile",
+    dashSearchPlaceholder: "Search something...",
+    dashBannerTitle: "How do you feel, ",
+    dashBannerSub: "Please, mark your mood today",
+    dashBannerBtn: "Mark now",
+    dashMoodChartTitle: "Mood chart",
+    dashMoodChartSub: "Track your mood easily",
+    dashDailyGoals: "Daily goals",
+    dashChecklistTitle: "Custom Checklist",
+    dashCoreRoutines: "Core Routines",
+    dashReadingTitle: "Daily reading",
+    dashYogaTitle: "Daily yoga",
+    dashCheckInHistory: "Your Check-In History",
+    dashCheckInHistorySub: "Review your past moods and daily journals.",
+    dashInsightsTitle: "Mood Insights",
+    dashInsightsSub: "Understand your emotional patterns and triggers.",
+    dashScheduledTitle: "Your Appointments & Webinars",
+    dashScheduledSub: "Manage your upcoming sessions with caretakers.",
+    dashTasksCompleted: "tasks completed",
+    dashNoteTimers: "Note: Complete core routines from the Dashboard timers.",
+    dashViewAll: "View all",
+    dashEnergyVsMood: "Energy vs Mood",
+    dashEnergyVsMoodDesc: "Your mood tends to be lower on days with poor sleep. When you log less than 6 hours of sleep, your stress levels jump by an average of 30%.",
+    dashRecurringPatterns: "Recurring Patterns",
+    dashRecurringPatternsDesc: "Thursdays are consistently your highest-stress days. Consider scheduling your Daily yoga earlier in the day to manage anxiety proactively.",
+    dash30DayTrend: "30-Day Trend",
+    dashPastMonth: "Past Month",
+    dashGoalsSub: "Track your custom checklist and routines.",
+    dashGoalsGreat: "Great progress today!",
+    dashOutOf: "out of",
+    dashTopTriggers: "Top Triggers",
+    dashTopTriggersDesc: "Work, Lack of sleep",
+    goalWater: "Drink 2L Water",
+    goalMeds: "Take prescribed medication",
+    goalWalk: "30 min walk",
+    goalJournal: "Write in journal",
+    counselorCenter: "Counselor Center",
+    counselorCenterSub: "Connect with your therapist, track recommendations, and generate reports.",
+    counselorAvailable: "Available Online",
+    counselorRole: "Clinical Psychologist",
+    viewProfileBtn: "View Profile",
+    recommendationsTitle: "Recommendations",
+    tasksBadge: "Tasks",
+    chatTitle: "Counselor Chat",
+    privateBadge: "Private",
+    shareLogsBtn: "Share Logs",
+    typeMessagePlaceholder: "Type a message...",
+    appointmentsTitle: "Appointments",
+    upcomingBadge: "Upcoming",
+    pastBadge: "Past",
+    rescheduleBtn: "Reschedule",
+    cancelBtn: "Cancel",
+    reportTitle: "Shareable Mental Health Report",
+    reportSub: "Generate a comprehensive summary of your check-ins to share with your counselor for better guidance.",
+    startDate: "Start Date",
+    endDate: "End Date",
+    includeInReport: "Include in report:",
+    moodSummary: "Mood Summary",
+    sleepData: "Sleep Data",
+    triggersStr: "Triggers",
+    activitiesStr: "Activities",
+    includeJournal: "Include personal journal entries",
+    generateReportBtn: "Generate Report",
+    reportPreview: "Report Preview",
+    editBtn: "Edit",
+    periodLabel: "Period:",
+    recentLabel: "Recent",
+    todayLabel: "Today",
+    shareBtn: "Share",
+    downloadBtn: "Download",
+    rescheduleTitle: "Reschedule Appointment",
+    cancelTitle: "Cancel Appointment?",
+    keepItBtn: "Keep It",
+    yesCancelBtn: "Yes, Cancel",
+    confirmBtn: "Confirm",
+    shareLogsTitle: "Share Logs",
+    shareLogsSub: "Select which recent entries you want to securely share with Dr. Sarah Jenkins.",
+    shareSelectedBtn: "Share Selected",
+    rec1Title: "10-minute breathing exercise",
+    rec1Desc: "Focus on deep abdominal breathing",
+    rec1Date: "Complete before Sept 20",
+    rec2Title: "Write 3 things you are grateful for",
+    rec2Desc: "Gratitude journaling",
+    rec2Date: "Complete today"
   },
   hi: {
     portalTitle: "सहाय — सुरक्षित एवं गोपनीय सहायता पोर्टल",
@@ -264,7 +450,99 @@ const TRANSLATIONS: Record<SupportedLanguage, Translations> = {
     mood5Label: "उत्कृष्ट",
     mood5Desc: "आनंदित और प्रेरित महसूस करना",
     aiSafeguard: "एआई सुरक्षा",
-    editCheckIn: "चेक-इन संपादित करें"
+    editCheckIn: "चेक-इन संपादित करें",
+    viewDashboardBtn: "डैशबोर्ड देखें",
+    dashNavDashboard: "डैशबोर्ड",
+    dashNavCalendar: "कैलेंडर",
+    dashNavInsights: "मूड इनसाइट्स",
+    dashNavScheduled: "निर्धारित",
+    dashNavGoals: "लक्ष्य",
+    dashNavCounselor: "काउंसलर",
+    dashNavSupport: "सहायता",
+    dashNavProfile: "प्रोफ़ाइल",
+    dashSearchPlaceholder: "कुछ खोजें...",
+    dashBannerTitle: "आप कैसा महसूस कर रहे हैं, ",
+    dashBannerSub: "कृपया, आज अपना मूड दर्ज करें",
+    dashBannerBtn: "अभी दर्ज करें",
+    dashMoodChartTitle: "मूड चार्ट",
+    dashMoodChartSub: "आसानी से अपने मूड को ट्रैक करें",
+    dashDailyGoals: "दैनिक लक्ष्य",
+    dashChecklistTitle: "कस्टम चेकलिस्ट",
+    dashCoreRoutines: "मुख्य दिनचर्या",
+    dashReadingTitle: "दैनिक पढ़ना",
+    dashYogaTitle: "दैनिक योग",
+    dashCheckInHistory: "आपका चेक-इन इतिहास",
+    dashCheckInHistorySub: "अपने पिछले मूड और दैनिक पत्रिकाओं की समीक्षा करें।",
+    dashInsightsTitle: "मूड इनसाइट्स",
+    dashInsightsSub: "अपने भावनात्मक पैटर्न और ट्रिगर्स को समझें।",
+    dashScheduledTitle: "आपकी नियुक्तियां और वेबिनार",
+    dashScheduledSub: "देखभालकर्ताओं के साथ अपने आगामी सत्रों का प्रबंधन करें।",
+    dashTasksCompleted: "कार्य पूरे किए गए",
+    dashNoteTimers: "नोट: डैशबोर्ड टाइमर से मुख्य दिनचर्या पूरी करें।",
+    dashViewAll: "सभी देखें",
+    dashEnergyVsMood: "ऊर्जा बनाम मूड",
+    dashEnergyVsMoodDesc: "खराब नींद वाले दिनों में आपका मूड आमतौर पर कम होता है। जब आप 6 घंटे से कम नींद लेते हैं, तो आपका तनाव स्तर औसतन 30% बढ़ जाता है।",
+    dashRecurringPatterns: "बार-बार होने वाले पैटर्न",
+    dashRecurringPatternsDesc: "गुरुवार लगातार आपके सबसे अधिक तनाव वाले दिन होते हैं। चिंता को सक्रिय रूप से प्रबंधित करने के लिए दिन में पहले अपना 'दैनिक योग' निर्धारित करने पर विचार करें।",
+    dash30DayTrend: "30-दिन की प्रवृत्ति",
+    dashPastMonth: "पिछला महीना",
+    dashGoalsSub: "अपनी कस्टम चेकलिस्ट और दिनचर्या ट्रैक करें।",
+    dashGoalsGreat: "आज शानदार प्रगति!",
+    dashOutOf: "में से",
+    dashTopTriggers: "शीर्ष ट्रिगर्स",
+    dashTopTriggersDesc: "काम, नींद की कमी",
+    goalWater: "2 लीटर पानी पिएं",
+    goalMeds: "निर्धारित दवा लें",
+    goalWalk: "30 मिनट की सैर",
+    goalJournal: "जर्नल में लिखें",
+    counselorCenter: "काउंसलर केंद्र",
+    counselorCenterSub: "अपने थेरेपिस्ट से जुड़ें, अनुशंसाओं को ट्रैक करें, और रिपोर्ट तैयार करें।",
+    counselorAvailable: "ऑनलाइन उपलब्ध",
+    counselorRole: "नैदानिक मनोवैज्ञानिक",
+    viewProfileBtn: "प्रोफ़ाइल देखें",
+    recommendationsTitle: "अनुशंसाएं",
+    tasksBadge: "कार्य",
+    chatTitle: "काउंसलर चैट",
+    privateBadge: "निजी",
+    shareLogsBtn: "लॉग साझा करें",
+    typeMessagePlaceholder: "एक संदेश टाइप करें...",
+    appointmentsTitle: "नियुक्तियां",
+    upcomingBadge: "आगामी",
+    pastBadge: "पिछला",
+    rescheduleBtn: "पुनर्निर्धारित करें",
+    cancelBtn: "रद्द करें",
+    reportTitle: "साझा करने योग्य मानसिक स्वास्थ्य रिपोर्ट",
+    reportSub: "बेहतर मार्गदर्शन के लिए अपने काउंसलर के साथ साझा करने के लिए अपने चेक-इन का एक व्यापक सारांश तैयार करें।",
+    startDate: "आरंभ तिथि",
+    endDate: "समाप्ति तिथि",
+    includeInReport: "रिपोर्ट में शामिल करें:",
+    moodSummary: "मूड सारांश",
+    sleepData: "नींद का डेटा",
+    triggersStr: "ट्रिगर्स",
+    activitiesStr: "गतिविधियां",
+    includeJournal: "व्यक्तिगत जर्नल प्रविष्टियां शामिल करें",
+    generateReportBtn: "रिपोर्ट बनाएं",
+    reportPreview: "रिपोर्ट पूर्वावलोकन",
+    editBtn: "संपादित करें",
+    periodLabel: "अवधि:",
+    recentLabel: "हालिया",
+    todayLabel: "आज",
+    shareBtn: "साझा करें",
+    downloadBtn: "डाउनलोड करें",
+    rescheduleTitle: "नियुक्ति पुनर्निर्धारित करें",
+    cancelTitle: "नियुक्ति रद्द करें?",
+    keepItBtn: "इसे रखें",
+    yesCancelBtn: "हां, रद्द करें",
+    confirmBtn: "पुष्टि करें",
+    shareLogsTitle: "लॉग साझा करें",
+    shareLogsSub: "चुनें कि आप कौन सी हालिया प्रविष्टियां डॉ. सारा जेनकिंस के साथ सुरक्षित रूप से साझा करना चाहते हैं।",
+    shareSelectedBtn: "चयनित साझा करें",
+    rec1Title: "10 मिनट की श्वास व्यायाम",
+    rec1Desc: "गहरी पेट की श्वास पर ध्यान दें",
+    rec1Date: "20 सितंबर से पहले पूरा करें",
+    rec2Title: "3 चीजें लिखें जिनके लिए आप आभारी हैं",
+    rec2Desc: "कृतज्ञता जर्नलिंग",
+    rec2Date: "आज पूरा करें"
   }
 };
 

@@ -1,12 +1,11 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { HeartPulse, CheckCircle2, Phone, ShieldCheck, ArrowRight, Sparkles, MessageSquare, Globe, Home } from 'lucide-react';
+import { HeartPulse, CheckCircle2, Phone, ShieldCheck, ArrowRight, Sparkles, MessageSquare, Globe, Home, UserCheck } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Navbar } from '../components/Navbar';
 import { MoodSelector } from '../components/MoodSelector';
 import type { MoodType } from '../components/MoodSelector';
 import { VoiceRecorder } from '../components/VoiceRecorder';
-import { CheckInCalendar } from '../components/CheckInCalendar';
 import { submitPatientCheckIn } from '../services/api';
 import { useLanguage } from '../context/LanguageContext';
 
@@ -18,6 +17,7 @@ export const PatientCheckIn: React.FC = () => {
   
   // Phone & OTP state
   const [phoneNumber, setPhoneNumber] = useState('');
+  const [patientName, setPatientName] = useState('');
   const [otp, setOtp] = useState('');
   const [otpSent, setOtpSent] = useState(false);
   const [authError, setAuthError] = useState('');
@@ -35,8 +35,12 @@ export const PatientCheckIn: React.FC = () => {
   // Phone + OTP verification
   const handleSendOtp = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!patientName.trim()) {
+      setAuthError(language === 'hi' ? 'कृपया अपना नाम दर्ज करें।' : 'Please enter your name.');
+      return;
+    }
     if (!phoneNumber || phoneNumber.length < 10) {
-      setAuthError('Please enter a valid 10-digit mobile number.');
+      setAuthError(language === 'hi' ? 'कृपया एक वैध 10-अंकीय मोबाइल नंबर दर्ज करें।' : 'Please enter a valid 10-digit mobile number.');
       return;
     }
     setAuthError('');
@@ -47,10 +51,15 @@ export const PatientCheckIn: React.FC = () => {
   const handleVerifyOtp = (e: React.FormEvent) => {
     e.preventDefault();
     if (otp !== '4821') {
-      setAuthError('Invalid OTP code. Please check your SMS.');
+      setAuthError(language === 'hi' ? 'अमान्य OTP कोड।' : 'Invalid OTP code.');
       return;
     }
     setAuthError('');
+    
+    // Save patient name and phone to local storage for the dashboard
+    localStorage.setItem('sahay_patient_name', patientName);
+    localStorage.setItem('sahay_patient_phone', phoneNumber);
+    
     setStep('CHECKIN');
   };
 
@@ -151,6 +160,23 @@ export const PatientCheckIn: React.FC = () => {
             <div className="p-6 sm:p-8 rounded-3xl bg-white/60 backdrop-blur-xl border border-white hover:border-emerald-200 shadow-[0_8px_30px_rgb(0,0,0,0.04)] space-y-5">
               {!otpSent ? (
                 <form onSubmit={handleSendOtp} className="space-y-4">
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                      {language === 'hi' ? 'आपका नाम' : 'Your Name'}
+                    </label>
+                    <div className="relative">
+                      <UserCheck className="w-4 h-4 absolute left-3.5 top-3.5 text-slate-400" />
+                      <input
+                        type="text"
+                        value={patientName}
+                        onChange={(e) => setPatientName(e.target.value)}
+                        placeholder={language === 'hi' ? 'अपना नाम दर्ज करें' : 'Enter your full name'}
+                        className="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 text-sm focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+                        required
+                      />
+                    </div>
+                  </div>
+
                   <div>
                     <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
                       {t.phoneLabel}
@@ -346,10 +372,10 @@ export const PatientCheckIn: React.FC = () => {
             </div>
 
             {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row items-center gap-3 w-full">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 w-full">
               <button
                 onClick={() => setStep('CHECKIN')}
-                className="w-full sm:w-1/2 px-6 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold transition-all border border-slate-200"
+                className="px-6 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold transition-all border border-slate-200"
               >
                 {t.editCheckIn}
               </button>
@@ -360,20 +386,18 @@ export const PatientCheckIn: React.FC = () => {
                   setJournalText('');
                   setHasVoiceNote(false);
                 }}
-                className="w-full sm:w-1/2 px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-all shadow-md shadow-emerald-600/20"
+                className="px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-all shadow-md shadow-emerald-600/20"
               >
                 {t.submitAnotherBtn}
               </button>
+              <Link
+                to="/patient/dashboard"
+                className="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition-all shadow-md shadow-indigo-600/20"
+              >
+                {t.viewDashboardBtn}
+              </Link>
             </div>
             
-            {/* Calendar */}
-            <CheckInCalendar 
-              currentCheckIn={selectedMood ? { 
-                date: '2026-09-10', 
-                mood: selectedMood, 
-                journal: journalText 
-              } : undefined} 
-            />
           </motion.div>
         )}
 
