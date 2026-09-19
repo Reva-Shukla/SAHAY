@@ -1,39 +1,80 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { HeartPulse, CheckCircle2, Phone, ShieldCheck, ArrowRight, Sparkles, MessageSquare, Globe, Home, UserCheck } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { HeartPulse, Phone, ArrowRight, Home, Globe, UserCheck, Lock, LogIn, UserPlus, ShieldCheck } from 'lucide-react';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Navbar } from '../components/Navbar';
+import { useLanguage } from '../context/LanguageContext';
 import { MoodSelector } from '../components/MoodSelector';
 import type { MoodType } from '../components/MoodSelector';
 import { VoiceRecorder } from '../components/VoiceRecorder';
-import { submitPatientCheckIn } from '../services/api';
-import { useLanguage } from '../context/LanguageContext';
 
 export const PatientCheckIn: React.FC = () => {
   const { language, setLanguage, t } = useLanguage();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
-  // Step state: 'AUTH' -> 'CHECKIN' -> 'SUBMITTED'
-  const [step, setStep] = useState<'AUTH' | 'CHECKIN' | 'SUBMITTED'>('AUTH');
+  // Master Step state: 'AUTH' -> 'CHECKIN' -> 'SUBMITTED'
+  const [step] = useState<'AUTH' | 'CHECKIN' | 'SUBMITTED'>(() => {
+    return searchParams.get('skipAuth') === 'true' ? 'CHECKIN' : 'AUTH';
+  });
+
+  // Auth Sub-flow
+  const [authMode, setAuthMode] = useState<'CHOICE' | 'LOGIN' | 'LOGIN_OTP' | 'SIGNUP' | 'SIGNUP_OTP'>('CHOICE');
   
-  // Phone & OTP state
+  // Form fields
   const [phoneNumber, setPhoneNumber] = useState('');
   const [patientName, setPatientName] = useState('');
+  const [password, setPassword] = useState('');
   const [otp, setOtp] = useState('');
-  const [otpSent, setOtpSent] = useState(false);
   const [authError, setAuthError] = useState('');
 
-  // Check-in form state
+  // Checkin states (left mostly as they were if needed later, but we skip directly to dashboard mostly)
   const [selectedMood, setSelectedMood] = useState<MoodType | null>(null);
   const [journalText, setJournalText] = useState('');
-  const [hasVoiceNote, setHasVoiceNote] = useState(false);
-  const [voiceDuration, setVoiceDuration] = useState(0);
-  const [voiceTranscript, setVoiceTranscript] = useState('');
   
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitMessage, setSubmitMessage] = useState('');
+  const [isSubmitting] = useState(false);
 
-  // Phone + OTP verification
-  const handleSendOtp = (e: React.FormEvent) => {
+  // Load registered users from local storage
+  const getRegisteredUsers = () => {
+    const data = localStorage.getItem('sahay_registered_users');
+    return data ? JSON.parse(data) : {};
+  };
+
+  const saveRegisteredUser = (user: any) => {
+    const users = getRegisteredUsers();
+    users[user.phone] = user;
+    localStorage.setItem('sahay_registered_users', JSON.stringify(users));
+  };
+
+  // Login Handlers
+  const handleLoginSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!phoneNumber || phoneNumber.length < 10) {
+      setAuthError(language === 'hi' ? 'कृपया एक वैध 10-अंकीय मोबाइल नंबर दर्ज करें।' : 'Please enter a valid 10-digit mobile number.');
+      return;
+    }
+    if (!password) {
+      setAuthError(language === 'hi' ? 'कृपया अपना पासवर्ड दर्ज करें।' : 'Please enter your password.');
+      return;
+    }
+    const users = getRegisteredUsers();
+    const user = users[phoneNumber];
+    if (!user) {
+      setAuthError(language === 'hi' ? 'कोई खाता नहीं मिला। कृपया साइन अप करें।' : 'Account not found. Please sign up.');
+      return;
+    }
+    if (user.password !== password) {
+      setAuthError(language === 'hi' ? 'गलत पासवर्ड।' : 'Incorrect password.');
+      return;
+    }
+    setAuthError('');
+    setPatientName(user.name);
+    setAuthMode('LOGIN_OTP');
+    setOtp('4821'); // Auto-fill demo OTP
+  };
+
+  // Signup Handlers
+  const handleSignupSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!patientName.trim()) {
       setAuthError(language === 'hi' ? 'कृपया अपना नाम दर्ज करें।' : 'Please enter your name.');
@@ -43,12 +84,23 @@ export const PatientCheckIn: React.FC = () => {
       setAuthError(language === 'hi' ? 'कृपया एक वैध 10-अंकीय मोबाइल नंबर दर्ज करें।' : 'Please enter a valid 10-digit mobile number.');
       return;
     }
+    if (!password || password.length < 6) {
+      setAuthError(language === 'hi' ? 'पासवर्ड कम से कम 6 अक्षरों का होना चाहिए।' : 'Password must be at least 6 characters.');
+      return;
+    }
+
+    const users = getRegisteredUsers();
+    if (users[phoneNumber]) {
+      setAuthError(language === 'hi' ? 'यह नंबर पहले से पंजीकृत है। कृपया लॉग इन करें।' : 'This number is already registered. Please log in.');
+      return;
+    }
+
     setAuthError('');
-    setOtpSent(true);
+    setAuthMode('SIGNUP_OTP');
     setOtp('4821'); // Auto-fill demo OTP
   };
 
-  const handleVerifyOtp = (e: React.FormEvent) => {
+  const handleVerifyOtp = (e: React.FormEvent, isSignup: boolean) => {
     e.preventDefault();
     if (otp !== '4821') {
       setAuthError(language === 'hi' ? 'अमान्य OTP कोड।' : 'Invalid OTP code.');
@@ -56,357 +108,234 @@ export const PatientCheckIn: React.FC = () => {
     }
     setAuthError('');
     
-    // Save patient name and phone to local storage for the dashboard
+    if (isSignup) {
+      saveRegisteredUser({
+        phone: phoneNumber,
+        name: patientName,
+        password: password
+      });
+      
+      // Initialize an empty dashboard structure for new user if needed
+      if (!localStorage.getItem(`sahay_data_${phoneNumber}`)) {
+        localStorage.setItem(`sahay_data_${phoneNumber}`, JSON.stringify({
+          appointments: { upcoming: [], past: [] },
+          checklist: [
+            { id: 1, text: 'Drink 2L of water', done: false },
+            { id: 2, text: 'Take medication', done: false }
+          ],
+          profilePic: null
+        }));
+      }
+    }
+
     localStorage.setItem('sahay_patient_name', patientName);
     localStorage.setItem('sahay_patient_phone', phoneNumber);
+    localStorage.setItem('sahay_active_user_phone', phoneNumber); // Explicit active user
     
-    setStep('CHECKIN');
-  };
-
-  // Submit Daily Check-in
-  const handleSubmitCheckIn = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!selectedMood) {
-      alert(language === 'hi' ? 'कृपया जमा करने से पहले चुनें कि आप कैसा महसूस कर रहे हैं।' : 'Please select how you are feeling today before submitting.');
-      return;
-    }
-
-    setIsSubmitting(true);
-    try {
-      const res = await submitPatientCheckIn({
-        phoneNumber,
-        mood: selectedMood,
-        journalText,
-        hasVoiceNote,
-        voiceDurationSeconds: voiceDuration,
-        recordedTranscript: voiceTranscript
-      });
-      setSubmitMessage(res.message);
-      setStep('SUBMITTED');
-    } catch (err) {
-      alert(language === 'hi' ? 'चेक-इन दर्ज करने में नेटवर्क समस्या। कृपया पुनः प्रयास करें।' : 'Network issue recording check-in. Please try again.');
-    } finally {
-      setIsSubmitting(false);
-    }
+    navigate('/patient/dashboard');
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#e6f7f4] via-[#fefae0] to-[#e8f0fe] text-slate-900 flex flex-col justify-between relative overflow-hidden">
       
-      {/* Soft Ambient Blobs (No leaves) */}
+      {/* Soft Ambient Blobs */}
       <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-emerald-200/30 rounded-full blur-[100px] pointer-events-none"></div>
       <div className="absolute bottom-0 right-0 w-[600px] h-[600px] bg-indigo-200/30 rounded-full blur-[100px] pointer-events-none"></div>
 
       <div className="relative z-10 flex flex-col justify-between min-h-screen">
         <Navbar />
 
-        {/* Language Switcher Bar & Role Switcher */}
-      <div className="bg-white/80 border-b border-slate-200 py-2 px-4">
-        <div className="max-w-xl mx-auto flex items-center justify-between text-xs">
-          <Link
-            to="/"
-            className="flex items-center gap-1.5 font-bold text-slate-600 hover:text-slate-900 transition-colors"
-          >
-            <Home className="w-3.5 h-3.5 text-indigo-600" />
-            <span>{language === 'hi' ? 'मुख्य पृष्ठ पर जाएं' : 'Switch Role / Home'}</span>
-          </Link>
-
-          {/* Language Toggle Pills */}
-          <div className="flex items-center gap-1 bg-slate-100 p-0.5 rounded-lg border border-slate-200">
-            <Globe className="w-3.5 h-3.5 text-slate-500 ml-1.5" />
-            <button
-              onClick={() => setLanguage('en')}
-              className={`px-2.5 py-0.5 rounded-md font-bold text-[11px] transition-all ${
-                language === 'en' ? 'bg-emerald-600 text-white shadow-xs' : 'text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              English
-            </button>
-            <button
-              onClick={() => setLanguage('hi')}
-              className={`px-2.5 py-0.5 rounded-md font-bold text-[11px] transition-all ${
-                language === 'hi' ? 'bg-emerald-600 text-white shadow-xs' : 'text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              हिन्दी
-            </button>
+        <div className="bg-white/80 border-b border-slate-200 py-2 px-4">
+          <div className="max-w-xl mx-auto flex items-center justify-between text-xs">
+            <Link to="/" className="flex items-center gap-1.5 font-bold text-slate-600 hover:text-slate-900 transition-colors">
+              <Home className="w-3.5 h-3.5 text-indigo-600" />
+              <span>{language === 'hi' ? 'मुख्य पृष्ठ पर जाएं' : 'Switch Role / Home'}</span>
+            </Link>
+            <div className="flex items-center gap-1 bg-slate-100 p-0.5 rounded-lg border border-slate-200">
+              <Globe className="w-3.5 h-3.5 text-slate-500 ml-1.5" />
+              <button onClick={() => setLanguage('en')} className={`px-2.5 py-0.5 rounded-md font-bold text-[11px] transition-all ${language === 'en' ? 'bg-emerald-600 text-white shadow-xs' : 'text-slate-600 hover:text-slate-900'}`}>English</button>
+              <button onClick={() => setLanguage('hi')} className={`px-2.5 py-0.5 rounded-md font-bold text-[11px] transition-all ${language === 'hi' ? 'bg-emerald-600 text-white shadow-xs' : 'text-slate-600 hover:text-slate-900'}`}>हिन्दी</button>
+            </div>
           </div>
         </div>
-      </div>
 
-      <main className="flex-1 max-w-xl w-full mx-auto px-4 py-6 sm:py-10 flex flex-col justify-center">
-        
-        {/* Step 1: Phone + OTP Access */}
-        {step === 'AUTH' && (
-          <motion.div
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="space-y-6"
-          >
-            {/* Header Banner */}
-            <div className="text-center space-y-3">
-              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold shadow-xs">
-                <HeartPulse className="w-4 h-4 text-emerald-600 animate-pulse" />
-                <span>{t.portalTitle}</span>
-              </div>
-              <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-                {t.howAreYou}
-              </h2>
-              <p className="text-xs sm:text-sm text-slate-600 max-w-md mx-auto leading-relaxed">
-                {t.subTitle}
-              </p>
-            </div>
-
-            <div className="p-6 sm:p-8 rounded-3xl bg-white/60 backdrop-blur-xl border border-white hover:border-emerald-200 shadow-[0_8px_30px_rgb(0,0,0,0.04)] space-y-5">
-              {!otpSent ? (
-                <form onSubmit={handleSendOtp} className="space-y-4">
-                  <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
-                      {language === 'hi' ? 'आपका नाम' : 'Your Name'}
-                    </label>
-                    <div className="relative">
-                      <UserCheck className="w-4 h-4 absolute left-3.5 top-3.5 text-slate-400" />
-                      <input
-                        type="text"
-                        value={patientName}
-                        onChange={(e) => setPatientName(e.target.value)}
-                        placeholder={language === 'hi' ? 'अपना नाम दर्ज करें' : 'Enter your full name'}
-                        className="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 text-sm focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
-                        required
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
-                      {t.phoneLabel}
-                    </label>
-                    <div className="relative">
-                      <Phone className="w-4 h-4 absolute left-3.5 top-3.5 text-slate-400" />
-                      <input
-                        type="tel"
-                        value={phoneNumber}
-                        onChange={(e) => setPhoneNumber(e.target.value)}
-                        placeholder={t.phonePlaceholder}
-                        className="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 text-sm focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
-                        maxLength={10}
-                        required
-                      />
-                    </div>
-                  </div>
-
-                  {authError && (
-                    <p className="text-xs text-rose-600 font-bold">{authError}</p>
-                  )}
-
-                  <button
-                    type="submit"
-                    className="w-full py-3.5 px-4 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow-md shadow-emerald-600/20 transition-all flex items-center justify-center gap-2"
-                  >
-                    <span>{t.getOtpBtn}</span>
-                    <ArrowRight className="w-4 h-4" />
-                  </button>
-                </form>
-              ) : (
-                <form onSubmit={handleVerifyOtp} className="space-y-4">
-                  <div>
-                    <div className="flex justify-between items-center mb-1.5">
-                      <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
-                        {t.otpLabel}
-                      </label>
-                      <button
-                        type="button"
-                        onClick={() => setOtpSent(false)}
-                        className="text-[11px] font-semibold text-emerald-700 hover:underline"
-                      >
-                        {t.changeNumber} ({phoneNumber})
-                      </button>
-                    </div>
-                    <input
-                      type="text"
-                      value={otp}
-                      onChange={(e) => setOtp(e.target.value)}
-                      placeholder={t.otpPlaceholder}
-                      className="w-full tracking-widest text-center text-lg font-mono font-bold py-2.5 rounded-2xl bg-slate-50 border border-slate-200 text-emerald-700 focus:outline-none focus:border-emerald-500"
-                      maxLength={4}
-                      required
-                    />
-                    <p className="text-[11px] text-slate-500 text-center mt-1">
-                      {t.otpDemoText}
-                    </p>
-                  </div>
-
-                  {authError && (
-                    <p className="text-xs text-rose-600 font-bold">{authError}</p>
-                  )}
-
-                  <button
-                    type="submit"
-                    className="w-full py-3.5 px-4 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow-md shadow-emerald-600/20 transition-all flex items-center justify-center gap-2"
-                  >
-                    <span>{t.verifyOtpBtn}</span>
-                    <ShieldCheck className="w-4 h-4" />
-                  </button>
-                </form>
-              )}
-
-              <div className="pt-2 border-t border-slate-100 text-center text-[11px] text-slate-500 flex items-center justify-center gap-1.5">
-                <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-                <span>{t.confidentialNotice}</span>
-              </div>
-            </div>
-          </motion.div>
-        )}
-
-        {/* Step 2: Daily Check-in Form */}
-        {step === 'CHECKIN' && (
-          <motion.div
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="space-y-6"
-          >
-            {/* Greeting Header */}
-            <div className="space-y-1">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-emerald-700 uppercase tracking-wider">
-                  {t.dailyCheckIn}
-                </span>
-                <span className="text-xs text-slate-500 font-mono">Mobile: {phoneNumber}</span>
-              </div>
-              <h2 className="text-xl sm:text-2xl font-bold text-slate-900">
-                {t.howAreYou}
-              </h2>
-            </div>
-
-            {/* Check-in Form Card */}
-            <form onSubmit={handleSubmitCheckIn} className="p-6 sm:p-8 rounded-3xl bg-white/60 backdrop-blur-xl border border-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] space-y-6">
-              
-              {/* Mood Selector */}
-              <MoodSelector
-                selectedMood={selectedMood}
-                onSelectMood={(m) => setSelectedMood(m)}
-              />
-
-              {/* Text Journaling */}
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
-                    <MessageSquare className="w-4 h-4 text-emerald-600" />
-                    <span>{t.journalLabel}</span>
-                  </label>
-                  <span className="text-[10px] font-bold text-emerald-700 flex items-center gap-1">
-                    <Sparkles className="w-3 h-3 text-emerald-600" />
-                    {t.aiSafeguard}
-                  </span>
+        <main className="flex-1 max-w-xl w-full mx-auto px-4 py-6 sm:py-10 flex flex-col justify-center">
+          
+          {step === 'AUTH' && (
+            <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
+              <div className="text-center space-y-3">
+                <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold shadow-xs">
+                  <HeartPulse className="w-4 h-4 text-emerald-600 animate-pulse" />
+                  <span>{t.portalTitle}</span>
                 </div>
-                <textarea
-                  rows={3}
-                  value={journalText}
-                  onChange={(e) => setJournalText(e.target.value)}
-                  placeholder={t.journalPlaceholder}
-                  className="w-full p-3.5 rounded-2xl bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 text-xs sm:text-sm focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
-                />
+                <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+                  {authMode === 'CHOICE' ? (language === 'hi' ? 'स्वागत है' : 'Welcome') : 
+                   authMode.includes('LOGIN') ? (language === 'hi' ? 'वापसी पर स्वागत है' : 'Welcome Back') : 
+                   (language === 'hi' ? 'खाता बनाएं' : 'Create Account')}
+                </h2>
+                <p className="text-xs sm:text-sm text-slate-600 max-w-md mx-auto leading-relaxed">
+                  {authMode === 'CHOICE' ? (language === 'hi' ? 'कृपया अपनी पहचान सत्यापित करें।' : 'Please authenticate to access your dashboard.') :
+                   authMode.includes('OTP') ? (language === 'hi' ? 'आपके फोन पर भेजा गया 4-अंकीय कोड दर्ज करें' : 'Enter the 4-digit code sent to your phone') :
+                   (language === 'hi' ? 'जारी रखने के लिए अपने विवरण दर्ज करें।' : 'Enter your details to continue.')}
+                </p>
               </div>
 
-              {/* Voice Note Recorder */}
-              <VoiceRecorder
-                onRecordingComplete={(hasRec, dur, transcript) => {
-                  setHasVoiceNote(hasRec);
-                  setVoiceDuration(dur);
-                  setVoiceTranscript(transcript);
-                }}
-              />
-
-              {/* Submit Button */}
-              <button
-                type="submit"
-                disabled={isSubmitting || !selectedMood}
-                className={`w-full py-3.5 px-6 rounded-2xl font-bold text-sm shadow-md transition-all flex items-center justify-center gap-2 ${
-                  selectedMood
-                    ? 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white shadow-emerald-600/20'
-                    : 'bg-slate-200 text-slate-400 cursor-not-allowed'
-                }`}
-              >
-                {isSubmitting ? (
-                  <span className="flex items-center gap-2">
-                    <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
-                    {t.submittingText}
-                  </span>
-                ) : (
-                  <>
-                    <span>{t.submitBtn}</span>
-                    <ArrowRight className="w-4 h-4" />
-                  </>
+              <div className="p-6 sm:p-8 rounded-3xl bg-white/60 backdrop-blur-xl border border-white hover:border-emerald-200 shadow-[0_8px_30px_rgb(0,0,0,0.04)] space-y-5 transition-all">
+                
+                {authMode === 'CHOICE' && (
+                  <div className="space-y-4">
+                    <button onClick={() => setAuthMode('LOGIN')} className="w-full flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 px-4 rounded-2xl shadow-sm transition-all text-sm">
+                      <LogIn className="w-4 h-4" /> {language === 'hi' ? 'लॉग इन करें' : 'Log In'}
+                    </button>
+                    <button onClick={() => setAuthMode('SIGNUP')} className="w-full flex items-center justify-center gap-2 bg-white hover:bg-slate-50 text-emerald-700 border border-emerald-200 font-bold py-3.5 px-4 rounded-2xl shadow-sm transition-all text-sm">
+                      <UserPlus className="w-4 h-4" /> {language === 'hi' ? 'साइन अप करें' : 'Sign Up'}
+                    </button>
+                  </div>
                 )}
-              </button>
-            </form>
-          </motion.div>
-        )}
 
-        {/* Step 3: Submitted Confirmation */}
-        {step === 'SUBMITTED' && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="p-8 rounded-3xl bg-white/60 backdrop-blur-xl border border-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] text-center space-y-6"
-          >
-            <div className="w-16 h-16 rounded-full bg-emerald-100 text-emerald-600 border border-emerald-300 mx-auto flex items-center justify-center">
-              <CheckCircle2 className="w-10 h-10" />
-            </div>
+                {authMode === 'LOGIN' && (
+                  <form onSubmit={handleLoginSubmit} className="space-y-4">
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                        {t.phoneLabel}
+                      </label>
+                      <div className="relative">
+                        <Phone className="w-4 h-4 absolute left-3.5 top-3.5 text-slate-400" />
+                        <input type="tel" value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} placeholder={t.phonePlaceholder} className="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 text-sm focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 font-mono" />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                        {language === 'hi' ? 'पासवर्ड' : 'Password'}
+                      </label>
+                      <div className="relative">
+                        <Lock className="w-4 h-4 absolute left-3.5 top-3.5 text-slate-400" />
+                        <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" className="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 text-sm focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500" />
+                      </div>
+                    </div>
+                    {authError && <p className="text-rose-500 text-xs font-bold bg-rose-50 p-2 rounded-lg">{authError}</p>}
+                    <button type="submit" className="w-full flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-4 rounded-2xl shadow-sm transition-all text-sm mt-2">
+                      {language === 'hi' ? 'लॉग इन करें' : 'Log In'} <ArrowRight className="w-4 h-4" />
+                    </button>
+                    <button type="button" onClick={() => setAuthMode('CHOICE')} className="w-full text-xs font-semibold text-slate-500 hover:text-slate-800 transition-colors py-2">
+                      {language === 'hi' ? 'वापस जाएँ' : 'Go Back'}
+                    </button>
+                  </form>
+                )}
 
-            <div className="space-y-2">
-              <h2 className="text-2xl font-bold text-slate-900">{t.recordedSuccessTitle}</h2>
-              <p className="text-xs sm:text-sm text-slate-600 max-w-sm mx-auto leading-relaxed">
-                {submitMessage || t.recordedSuccessMsg}
-              </p>
-            </div>
+                {authMode === 'SIGNUP' && (
+                  <form onSubmit={handleSignupSubmit} className="space-y-4">
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                        {language === 'hi' ? 'आपका नाम' : 'Your Name'}
+                      </label>
+                      <div className="relative">
+                        <UserCheck className="w-4 h-4 absolute left-3.5 top-3.5 text-slate-400" />
+                        <input type="text" value={patientName} onChange={(e) => setPatientName(e.target.value)} placeholder={language === 'hi' ? 'अपना नाम दर्ज करें' : 'Enter your full name'} className="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 text-sm focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500" />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                        {t.phoneLabel}
+                      </label>
+                      <div className="relative">
+                        <Phone className="w-4 h-4 absolute left-3.5 top-3.5 text-slate-400" />
+                        <input type="tel" value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} placeholder={t.phonePlaceholder} className="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 text-sm focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 font-mono" />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                        {language === 'hi' ? 'पासवर्ड सेट करें' : 'Set Password'}
+                      </label>
+                      <div className="relative">
+                        <Lock className="w-4 h-4 absolute left-3.5 top-3.5 text-slate-400" />
+                        <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" className="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 text-sm focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500" />
+                      </div>
+                    </div>
+                    {authError && <p className="text-rose-500 text-xs font-bold bg-rose-50 p-2 rounded-lg">{authError}</p>}
+                    <button type="submit" className="w-full flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-4 rounded-2xl shadow-sm transition-all text-sm mt-2">
+                      {language === 'hi' ? 'खाता बनाएं' : 'Create Account'} <ArrowRight className="w-4 h-4" />
+                    </button>
+                    <button type="button" onClick={() => setAuthMode('CHOICE')} className="w-full text-xs font-semibold text-slate-500 hover:text-slate-800 transition-colors py-2">
+                      {language === 'hi' ? 'वापस जाएँ' : 'Go Back'}
+                    </button>
+                  </form>
+                )}
 
-            <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-900 text-left space-y-2">
-              <p className="font-bold flex items-center gap-1.5 text-emerald-800">
-                <HeartPulse className="w-4 h-4 text-emerald-600" />
-                {t.teleManasNotice}
-              </p>
-              <p className="text-[11px] text-slate-700">
-                If you or someone you know is in severe emotional distress, call toll-free helpline <strong>14416</strong> or <strong>1800-891-4416</strong> immediately.
-              </p>
-            </div>
+                {(authMode === 'LOGIN_OTP' || authMode === 'SIGNUP_OTP') && (
+                  <form onSubmit={(e) => handleVerifyOtp(e, authMode === 'SIGNUP_OTP')} className="space-y-4">
+                    <div>
+                      <div className="flex justify-between items-center mb-1.5">
+                        <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
+                          {t.otpLabel}
+                        </label>
+                        <button type="button" onClick={() => setAuthMode(authMode === 'SIGNUP_OTP' ? 'SIGNUP' : 'LOGIN')} className="text-[11px] font-semibold text-emerald-700 hover:underline">
+                          {t.changeNumber} ({phoneNumber})
+                        </button>
+                      </div>
+                      <input type="text" value={otp} onChange={(e) => setOtp(e.target.value)} placeholder={t.otpPlaceholder} className="w-full tracking-widest text-center text-lg font-mono font-bold py-2.5 rounded-2xl bg-slate-50 border border-slate-200 text-emerald-700 focus:outline-none focus:border-emerald-500" maxLength={4} />
+                    </div>
+                    {authError && <p className="text-rose-500 text-xs font-bold bg-rose-50 p-2 rounded-lg">{authError}</p>}
+                    <button type="submit" className="w-full flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-2xl shadow-sm transition-all text-sm mt-2">
+                      <ShieldCheck className="w-4 h-4" /> {language === 'hi' ? 'सत्यापित करें' : 'Verify'}
+                    </button>
+                  </form>
+                )}
+              </div>
+            </motion.div>
+          )}
+          
+          {step === 'CHECKIN' && (
+            <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
+               <div className="text-center">
+                 <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900">{t.dashBannerTitle} {patientName}?</h2>
+                 <p className="text-slate-500 mt-2 text-sm">{t.dashBannerSub}</p>
+               </div>
+               
+               <form onSubmit={async (e) => { 
+                 e.preventDefault(); 
+                 if (!selectedMood) return;
+                 const newCheckIn = {
+                   date: new Date().toISOString().split('T')[0],
+                   mood: selectedMood,
+                   journal: journalText,
+                   energy: 6,
+                   stress: 5,
+                   sleep: '7h 00m'
+                 };
+                 const phone = localStorage.getItem('sahay_active_user_phone');
+                 if (phone) {
+                   const histStr = localStorage.getItem(`sahay_history_${phone}`);
+                   const hist = histStr ? JSON.parse(histStr) : [];
+                   hist.push(newCheckIn);
+                   localStorage.setItem(`sahay_history_${phone}`, JSON.stringify(hist));
+                 }
+                 navigate('/patient/dashboard'); 
+               }} className="p-6 sm:p-8 rounded-3xl bg-white border border-slate-100 shadow-xl shadow-slate-200/40 space-y-8">
+                 <div>
+                   <label className="block text-sm font-bold text-slate-800 mb-4">{language === 'hi' ? 'आज आप कैसा महसूस कर रहे हैं?' : 'How are you feeling today?'}</label>
+                   <MoodSelector selectedMood={selectedMood} onSelectMood={setSelectedMood} />
+                 </div>
+                 <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-bold text-slate-800 mb-2">{language === 'hi' ? 'जर्नल' : 'Journal'}</label>
+                      <p className="text-xs text-slate-500 mb-3">{language === 'hi' ? 'कुछ और शेयर करना चाहते हैं?' : 'Anything else you want to share?'}</p>
+                      <textarea value={journalText} onChange={(e) => setJournalText(e.target.value)} rows={3} className="w-full p-4 rounded-2xl bg-slate-50 border border-slate-200 text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500" placeholder={language === 'hi' ? 'यहां लिखें...' : 'Write here...'} />
+                    </div>
+                    <VoiceRecorder onRecordingComplete={() => {}} />
+                 </div>
+                 <button type="submit" disabled={!selectedMood || isSubmitting} className="w-full flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-bold py-4 px-6 rounded-2xl transition-all shadow-sm">
+                   {isSubmitting ? '...' : (language === 'hi' ? 'चेक-इन करें' : 'Check In')} <ArrowRight className="w-5 h-5" />
+                 </button>
+               </form>
+            </motion.div>
+          )}
 
-            {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 w-full">
-              <button
-                onClick={() => setStep('CHECKIN')}
-                className="px-6 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold transition-all border border-slate-200"
-              >
-                {t.editCheckIn}
-              </button>
-              <button
-                onClick={() => {
-                  setStep('CHECKIN');
-                  setSelectedMood(null);
-                  setJournalText('');
-                  setHasVoiceNote(false);
-                }}
-                className="px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-all shadow-md shadow-emerald-600/20"
-              >
-                {t.submitAnotherBtn}
-              </button>
-              <Link
-                to="/patient/dashboard"
-                className="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition-all shadow-md shadow-indigo-600/20"
-              >
-                {t.viewDashboardBtn}
-              </Link>
-            </div>
-            
-          </motion.div>
-        )}
+        </main>
 
-      </main>
-
-      {/* Footer */}
-      <footer className="py-4 text-center text-xs text-slate-500 border-t border-slate-200 bg-white/60 backdrop-blur-md">
-        SAHAY Portal — Mental Health Support System (Smart India Hackathon 2026)
-      </footer>
+        <footer className="py-6 text-center text-xs font-medium text-slate-400">
+          <p>© 2026 SIH Tele-MANAS Integrated Platform. All rights reserved.</p>
+        </footer>
       </div>
     </div>
   );

@@ -7,7 +7,7 @@ export const INTERVENTION_CATALOG: InterventionRecommendation[] = [
     riskLevel: "RED",
     title: "Dispatch Emergency Tele-MANAS Mobile Crisis Unit",
     category: "Counselling",
-    description: "Deploy immediate local ground counselor and clinical psychologist to patient's verified district location for physical welfare check.",
+    description: "Deploy immediate local ground counsellor and clinical psychologist to patient's verified district location for physical welfare check.",
     urgency: "Immediate (within 2h)",
     actionLabel: "Dispatch Crisis Unit"
   },
@@ -36,7 +36,7 @@ export const INTERVENTION_CATALOG: InterventionRecommendation[] = [
     riskLevel: "YELLOW",
     title: "Schedule Weekly 1-on-1 Cognitive Therapy Session",
     category: "Counselling",
-    description: "Assign assigned district psychiatric counselor for weekly video/audio therapy sessions targeting anxiety and trauma triggers.",
+    description: "Assign assigned district psychiatric counsellor for weekly video/audio therapy sessions targeting anxiety and trauma triggers.",
     urgency: "High (within 24h)",
     actionLabel: "Book Therapy Session"
   },

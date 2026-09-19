@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { 
   LayoutDashboard, Calendar as CalendarIcon, Target, Users, 
   MessageSquare, LogOut, ChevronRight,
-  Clock, Play, Pause, HeartPulse, Search, Check, TrendingUp, Moon, Zap, Smile, X, Activity, Globe, Video, User
+  Clock, Play, Pause, HeartPulse, Search, Check, TrendingUp, Moon, Zap, Smile, X, Activity, Globe, Video, User, RotateCcw, Wind
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { 
@@ -11,16 +11,17 @@ import {
 import { CheckInCalendar, getMoodEmoji } from '../components/CheckInCalendar';
 import type { PastCheckIn } from '../components/CheckInCalendar';
 import { useLanguage } from '../context/LanguageContext';
-import { CounselorTab } from '../components/CounselorTab';
+import { CounsellorTab } from '../components/CounsellorTab';
+import { SupportTab } from '../components/SupportTab';
 
 const mockMoodData = [
-  { date: '8', mood: 2, label: 'Normal' },
-  { date: '9', mood: 4, label: 'Amazing' },
-  { date: '10', mood: 3, label: 'Great' },
-  { date: '11', mood: 2, label: 'Normal' },
-  { date: '12', mood: 2, label: 'Normal' },
-  { date: '13', mood: 1, label: 'Bad' },
-  { date: '14', mood: 3, label: 'Great' },
+  { date: '8', mood: 2, label: 'Normal', sleep: '6h', energy: 'Medium' },
+  { date: '9', mood: 4, label: 'Amazing', sleep: '8h', energy: 'High' },
+  { date: '10', mood: 3, label: 'Great', sleep: '7h', energy: 'High' },
+  { date: '11', mood: 2, label: 'Normal', sleep: '6h', energy: 'Medium' },
+  { date: '12', mood: 2, label: 'Normal', sleep: '7h', energy: 'Medium' },
+  { date: '13', mood: 1, label: 'Bad', sleep: '4h', energy: 'Low' },
+  { date: '14', mood: 3, label: 'Great', sleep: '8h', energy: 'High' },
 ];
 
 const moodLabels = ['Terrible', 'Bad', 'Normal', 'Great', 'Amazing'];
@@ -75,26 +76,43 @@ const TimerCard: React.FC<TimerCardProps> = ({ title, initialMinutes, bgClass, b
     }
   };
 
+  const handleReset = () => {
+    setIsRunning(false);
+    setTimeLeft(minutes * 60);
+    setIsDone(false);
+  };
+
   const formatTime = (seconds: number) => {
     const m = Math.floor(seconds / 60);
     const s = seconds % 60;
     return `${m}:${s < 10 ? '0' : ''}${s}`;
   };
 
+  const isPaused = !isRunning && timeLeft < minutes * 60 && !isDone;
+
   return (
     <div className={`${bgClass} rounded-2xl p-4 relative overflow-hidden flex items-center justify-between shadow-sm border ${borderClass}`}>
       <div className="relative z-10 w-full">
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-1.5">
-            <button onClick={handleMinus} className={`w-5 h-5 flex items-center justify-center bg-white rounded shadow-sm ${textClass} border ${borderClass} font-bold text-xs`} disabled={isRunning || isDone}>-</button>
+            <button onClick={handleMinus} className={`w-5 h-5 flex items-center justify-center bg-white rounded shadow-sm ${textClass} border ${borderClass} font-bold text-xs`} disabled={isRunning || isDone || isPaused}>-</button>
             <div className={`px-2 py-0.5 bg-white rounded-md text-[10px] font-bold ${textClass} border ${borderClass} w-12 text-center`}>
-              {isRunning ? formatTime(timeLeft) : `${minutes} min`}
+              {isRunning || isPaused ? formatTime(timeLeft) : `${minutes} min`}
             </div>
-            <button onClick={handlePlus} className={`w-5 h-5 flex items-center justify-center bg-white rounded shadow-sm ${textClass} border ${borderClass} font-bold text-xs`} disabled={isRunning || isDone}>+</button>
+            <button onClick={handlePlus} className={`w-5 h-5 flex items-center justify-center bg-white rounded shadow-sm ${textClass} border ${borderClass} font-bold text-xs`} disabled={isRunning || isDone || isPaused}>+</button>
           </div>
           {isDone ? (
             <div className="w-8 h-8 bg-emerald-500 rounded-full flex items-center justify-center text-white shadow-sm border border-emerald-400">
               <Check className="w-4 h-4" />
+            </div>
+          ) : isPaused ? (
+            <div className="flex gap-1">
+              <button onClick={() => setIsRunning(true)} className={`w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-sm z-10 relative group hover:opacity-80 transition-colors border ${borderClass} ${textClass}`}>
+                <Play className="w-3 h-3 ml-0.5 fill-current" />
+              </button>
+              <button onClick={handleReset} className={`w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-sm z-10 relative group hover:opacity-80 transition-colors border ${borderClass} ${textClass}`}>
+                <RotateCcw className="w-3 h-3 text-current" />
+              </button>
             </div>
           ) : (
             <button onClick={() => setIsRunning(!isRunning)} className={`w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-sm z-10 relative group hover:opacity-80 transition-colors border ${borderClass} ${textClass}`}>
@@ -108,8 +126,34 @@ const TimerCard: React.FC<TimerCardProps> = ({ title, initialMinutes, bgClass, b
   );
 };
 
+const CustomMoodTooltip = ({ active, payload }: any) => {
+  if (active && payload && payload.length) {
+    const data = payload[0].payload;
+    return (
+      <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-xl text-sm space-y-2 z-50 min-w-[150px]">
+        <p className="font-bold text-slate-800 border-b border-slate-100 pb-2">Sep {data.date}</p>
+        <div className="flex justify-between items-center gap-4">
+          <span className="text-slate-500 font-medium flex items-center gap-1.5"><Smile className="w-4 h-4 text-emerald-500" /> Mood</span>
+          <span className="font-extrabold text-slate-900">{data.label}</span>
+        </div>
+        <div className="flex justify-between items-center gap-4">
+          <span className="text-slate-500 font-medium flex items-center gap-1.5"><Zap className="w-4 h-4 text-amber-500" /> Energy</span>
+          <span className="font-extrabold text-slate-900">{data.energy}</span>
+        </div>
+        <div className="flex justify-between items-center gap-4">
+          <span className="text-slate-500 font-medium flex items-center gap-1.5"><Moon className="w-4 h-4 text-indigo-500" /> Sleep</span>
+          <span className="font-extrabold text-slate-900">{data.sleep}</span>
+        </div>
+      </div>
+    );
+  }
+  return null;
+};
+
 export const PatientDashboard: React.FC = () => {
   const { language, setLanguage, t } = useLanguage();
+  
+  const patientPhone = localStorage.getItem('sahay_active_user_phone') || localStorage.getItem('sahay_patient_phone') || '+91 00000 00000';
   
   const [patientName] = useState(() => {
     return localStorage.getItem('sahay_patient_name') || 'Dianne Russell';
@@ -123,39 +167,115 @@ export const PatientDashboard: React.FC = () => {
     return name.substring(0, 2).toUpperCase() || 'U';
   };
 
-  const [activeTab, setActiveTab] = useState<'DASHBOARD' | 'CALENDAR' | 'INSIGHTS' | 'SCHEDULED' | 'GOALS' | 'COUNSELOR' | 'PROFILE'>('DASHBOARD');
+  const [activeTab, setActiveTab] = useState<'DASHBOARD' | 'CALENDAR' | 'INSIGHTS' | 'SCHEDULED' | 'GOALS' | 'COUNSELLOR' | 'PROFILE' | 'SUPPORT' | 'YOGA'>('DASHBOARD');
+
+  // Load User Data
+  const loadUserData = () => {
+    const raw = localStorage.getItem(`sahay_data_${patientPhone}`);
+    if (raw) return JSON.parse(raw);
+    return null;
+  };
+  const initialData = loadUserData();
 
   // Profile Picture State
-  const [profilePic, setProfilePic] = useState<string | null>(localStorage.getItem('sahay_patient_pic'));
+  const [profilePic, setProfilePic] = useState<string | null>(initialData?.profilePic || null);
 
   const handlePicUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
       const reader = new FileReader();
       reader.onload = (event) => {
         const result = event.target?.result as string;
-        setProfilePic(result);
-        localStorage.setItem('sahay_patient_pic', result);
+        
+        // Compress the image so it fits within localStorage limits comfortably
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const MAX_WIDTH = 300;
+          const MAX_HEIGHT = 300;
+          let width = img.width;
+          let height = img.height;
+          
+          // Calculate new dimensions keeping aspect ratio
+          if (width > height) {
+            if (width > MAX_WIDTH) {
+              height *= MAX_WIDTH / width;
+              width = MAX_WIDTH;
+            }
+          } else {
+            if (height > MAX_HEIGHT) {
+              width *= MAX_HEIGHT / height;
+              height = MAX_HEIGHT;
+            }
+          }
+          
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          if (ctx) {
+            ctx.drawImage(img, 0, 0, width, height);
+            // Compress to JPEG with 0.7 quality
+            const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+            setProfilePic(dataUrl);
+          } else {
+            // Fallback to original if canvas fails
+            setProfilePic(result);
+          }
+        };
+        img.src = result;
       };
-      reader.readAsDataURL(e.target.files[0]);
+      reader.readAsDataURL(file);
     }
   };
 
-  const patientPhone = localStorage.getItem('sahay_patient_phone') || '+91 00000 00000';
   const [selectedPastDay, setSelectedPastDay] = useState<PastCheckIn | null>(null);
 
   // Daily Goals State
-  const [isReadingDone, setIsReadingDone] = useState(false);
-  const [isYogaDone, setIsYogaDone] = useState(false);
+  const [isReadingDone, setIsReadingDone] = useState(initialData?.isReadingDone || false);
+  const [isYogaDone, setIsYogaDone] = useState(initialData?.isYogaDone || false);
 
-  // Appointments State (shared)
-  const [appointments, setAppointments] = useState<{ upcoming: any[], past: any[] }>({
+  // Appointments State
+  const [appointments, setAppointments] = useState<{ upcoming: any[], past: any[] }>(initialData?.appointments || {
     upcoming: [
-      { id: 1, date: '2026-09-22', time: '10:00 AM', counselor: 'Dr. Sarah Jenkins', type: 'Video Session' }
+      { id: 1, date: '2026-09-22', time: '10:00 AM', counsellor: 'Dr. Sarah Jenkins', type: 'Video Session' },
+      { id: 3, date: '2026-09-17', time: '11:00 AM', counsellor: 'Dr. Sarah Jenkins', type: 'Clinic Visit' }
     ],
     past: [
-      { id: 2, date: '2026-09-15', time: '2:00 PM', counselor: 'Dr. Sarah Jenkins', status: 'Completed' }
+      { id: 2, date: '2026-09-15', time: '2:00 PM', counsellor: 'Dr. Sarah Jenkins', status: 'Completed' }
     ]
   });
+
+  const [checklist, setChecklist] = useState(initialData?.checklist || [
+    { id: 1, text: 'Drink 2L Water', done: false },
+    { id: 2, text: 'Take prescribed medication', done: false },
+    { id: 3, text: '30 min walk', done: false },
+    { id: 4, text: 'Write in journal', done: false }
+  ]);
+
+  // Persist User Data
+  useEffect(() => {
+    const dataToSave = {
+      profilePic,
+      isReadingDone,
+      isYogaDone,
+      appointments,
+      checklist
+    };
+    try {
+      localStorage.setItem(`sahay_data_${patientPhone}`, JSON.stringify(dataToSave));
+    } catch (error) {
+      console.error("Storage limit exceeded, likely due to a large profile picture.", error);
+      try {
+        // Fallback: save without profile picture to prevent data loss
+        const fallbackData = { ...dataToSave, profilePic: null };
+        localStorage.setItem(`sahay_data_${patientPhone}`, JSON.stringify(fallbackData));
+        alert(language === 'hi' ? 'प्रोफ़ाइल फ़ोटो बहुत बड़ी है और सहेजी नहीं जा सकी।' : 'The selected image is too large and could not be saved.');
+        setProfilePic(null); // Reset state so we don't keep triggering this on every other change
+      } catch (fallbackError) {
+        console.error("Failed to save even without profilePic", fallbackError);
+      }
+    }
+  }, [profilePic, isReadingDone, isYogaDone, appointments, checklist, patientPhone, language]);
 
   const [showScheduleNew, setShowScheduleNew] = useState(false);
   const [newAptDate, setNewAptDate] = useState('');
@@ -171,7 +291,7 @@ export const PatientDashboard: React.FC = () => {
         id: Date.now(),
         date: newAptDate,
         time: newAptTime,
-        counselor: 'Dr. Sarah Jenkins',
+        counsellor: 'Dr. Sarah Jenkins',
         type: 'Video Session'
       }]
     }));
@@ -179,19 +299,13 @@ export const PatientDashboard: React.FC = () => {
     setNewAptDate('');
     setNewAptTime('');
   };
-  const [checklist, setChecklist] = useState([
-    { id: 1, text: 'Drink 2L Water', done: false },
-    { id: 2, text: 'Take prescribed medication', done: false },
-    { id: 3, text: '30 min walk', done: false },
-    { id: 4, text: 'Write in journal', done: false }
-  ]);
 
-  const totalTasks = 2 + checklist.length;
-  const completedTasks = (isReadingDone ? 1 : 0) + (isYogaDone ? 1 : 0) + checklist.filter(item => item.done).length;
+  const totalTasks = checklist.length;
+  const completedTasks = checklist.filter((item: any) => item.done).length;
   const dailyGoalPercent = Math.round((completedTasks / totalTasks) * 100);
 
   const toggleChecklistItem = (id: number) => {
-    setChecklist(prev => prev.map(item => item.id === id ? { ...item, done: !item.done } : item));
+    setChecklist((prev: any[]) => prev.map((item: any) => item.id === id ? { ...item, done: !item.done } : item));
   };
 
   const handleSidebarDayClick = (day: PastCheckIn | null) => {
@@ -202,6 +316,12 @@ export const PatientDashboard: React.FC = () => {
       setSelectedPastDay(null);
     }
   };
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const computedUpcoming = appointments.upcoming.filter(apt => new Date(apt.date) >= today);
+  const computedMissed = appointments.upcoming.filter(apt => new Date(apt.date) < today);
 
   return (
     <div className="min-h-screen bg-[#f0fdf4] text-slate-900 flex font-sans overflow-hidden">
@@ -235,18 +355,22 @@ export const PatientDashboard: React.FC = () => {
               <Target className="w-5 h-5" />
               {t.dashNavGoals}
             </button>
-            <button onClick={() => setActiveTab('COUNSELOR')} className={`flex w-full items-center gap-3 py-3 px-4 rounded-xl transition-colors ${activeTab === 'COUNSELOR' ? 'bg-white shadow-sm text-emerald-700 border-l-4 border-emerald-500' : 'hover:bg-white/60 hover:text-slate-900'}`}>
+            <button onClick={() => setActiveTab('YOGA')} className={`flex w-full items-center gap-3 py-3 px-4 rounded-xl transition-colors ${activeTab === 'YOGA' ? 'bg-white shadow-sm text-emerald-700 border-l-4 border-emerald-500' : 'hover:bg-white/60 hover:text-slate-900'}`}>
+              <Wind className="w-5 h-5" />
+              {t.dashNavYoga}
+            </button>
+            <button onClick={() => setActiveTab('COUNSELLOR')} className={`flex w-full items-center gap-3 py-3 px-4 rounded-xl transition-colors ${activeTab === 'COUNSELLOR' ? 'bg-white shadow-sm text-emerald-700 border-l-4 border-emerald-500' : 'hover:bg-white/60 hover:text-slate-900'}`}>
               <Users className="w-5 h-5" />
-              {t.dashNavCounselor}
+              {t.dashNavCounsellor}
             </button>
           </nav>
         </div>
 
         <div className="space-y-2 text-sm font-medium">
-          <a href="#" className="flex items-center gap-3 py-3 px-4 rounded-xl hover:bg-white/60 hover:text-slate-900 transition-colors">
+          <button onClick={() => setActiveTab('SUPPORT')} className={`flex w-full items-center gap-3 py-3 px-4 rounded-xl transition-colors ${activeTab === 'SUPPORT' ? 'bg-white shadow-sm text-emerald-700 border-l-4 border-emerald-500' : 'hover:bg-white/60 hover:text-slate-900'}`}>
             <MessageSquare className="w-5 h-5" />
             {t.dashNavSupport}
-          </a>
+          </button>
           <button onClick={() => setActiveTab('PROFILE')} className={`flex w-full items-center gap-3 py-3 px-4 rounded-xl transition-colors ${activeTab === 'PROFILE' ? 'bg-white shadow-sm text-emerald-700 border-l-4 border-emerald-500' : 'hover:bg-white/60 hover:text-slate-900'}`}>
             <User className="w-5 h-5" />
             {t.dashNavProfile}
@@ -309,24 +433,10 @@ export const PatientDashboard: React.FC = () => {
                     <p className="text-slate-500 font-medium text-base mt-1">{t.dashBannerSub}</p>
                   </div>
                   <div className="flex items-center gap-4">
-                    <button className="flex items-center gap-2 bg-indigo-50 border border-indigo-100 px-4 py-2 rounded-xl text-sm font-bold text-indigo-700 shadow-sm hover:bg-indigo-100 hover:scale-105 transition-all">
+                    <Link to="/patient?skipAuth=true" className="flex items-center gap-2 bg-indigo-50 border border-indigo-100 px-4 py-2 rounded-xl text-sm font-bold text-indigo-700 shadow-sm hover:bg-indigo-100 hover:scale-105 transition-all">
                       <Zap className="w-4 h-4" />
                       {t.dashBannerBtn}
-                    </button>
-                    <div className="flex bg-white/60 backdrop-blur-md rounded-xl p-1 shadow-sm border border-white">
-                      <button 
-                        onClick={() => setLanguage('en')}
-                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${language === 'en' ? 'bg-emerald-600 text-white shadow-sm' : 'text-slate-500 hover:bg-slate-50'}`}
-                      >
-                        <Globe className="w-3.5 h-3.5" /> English
-                      </button>
-                      <button 
-                        onClick={() => setLanguage('hi')}
-                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${language === 'hi' ? 'bg-emerald-600 text-white shadow-sm' : 'text-slate-500 hover:bg-slate-50'}`}
-                      >
-                        हिन्दी
-                      </button>
-                    </div>
+                    </Link>
                   </div>
                 </div>
 
@@ -348,10 +458,7 @@ export const PatientDashboard: React.FC = () => {
                           domain={[0, 4]}
                           ticks={[0, 1, 2, 3, 4]}
                         />
-                        <Tooltip 
-                          contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
-                          formatter={(value: any) => [moodLabels[value as number], "Mood"]}
-                        />
+                        <Tooltip content={<CustomMoodTooltip />} />
                         <Line 
                           type="monotone" 
                           dataKey="mood" 
@@ -369,31 +476,52 @@ export const PatientDashboard: React.FC = () => {
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4">
                   <button onClick={() => setActiveTab('GOALS')} className="bg-emerald-50 hover:bg-emerald-100 rounded-2xl p-4 flex items-center justify-between border border-emerald-100 shadow-sm transition-colors text-left group">
                     <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 rounded-full border-4 border-emerald-400 flex items-center justify-center font-bold text-emerald-800 text-sm bg-white transition-all group-hover:scale-105">
-                        {dailyGoalPercent}%
+                      <div 
+                        className="w-12 h-12 rounded-full flex items-center justify-center shadow-sm relative transition-all group-hover:scale-105 shrink-0"
+                        style={{ background: `conic-gradient(#34d399 ${dailyGoalPercent}%, #e2e8f0 ${dailyGoalPercent}%)` }}
+                      >
+                        <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center font-bold text-emerald-800 text-sm absolute">
+                          {dailyGoalPercent}%
+                        </div>
                       </div>
                       <span className="font-bold text-sm text-emerald-900">{t.dashDailyGoals}</span>
                     </div>
                     <ChevronRight className="w-4 h-4 text-emerald-600 transition-transform group-hover:translate-x-1" />
                   </button>
                   
-                  <TimerCard 
-                    title={t.dashReadingTitle}
-                    initialMinutes={7} 
-                    bgClass="bg-slate-50/80 backdrop-blur-sm"
-                    borderClass="border-slate-200"
-                    textClass="text-slate-800"
-                    onComplete={() => setIsReadingDone(true)}
-                  />
+                  <div onClick={() => setActiveTab('YOGA')} className="bg-slate-50/80 backdrop-blur-sm rounded-2xl p-4 relative overflow-hidden flex items-center justify-between shadow-sm border border-slate-200 cursor-pointer hover:shadow-md transition-all group">
+                    <div className="relative z-10 w-full">
+                      <div className="flex items-center justify-between mb-2">
+                        <h3 className="font-bold text-slate-800">{t.dashReadingTitle}</h3>
+                        <span className="text-xl font-bold font-mono text-slate-400">07:00</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <div className="text-[10px] uppercase font-bold tracking-wider text-slate-400 group-hover:text-indigo-500 transition-colors">Start Session</div>
+                        <div className="flex items-center gap-1">
+                          <div className="w-8 h-8 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center transition-colors group-hover:bg-indigo-600 group-hover:text-white shadow-sm pointer-events-none">
+                            <Play className="w-4 h-4 ml-0.5" />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
 
-                  <TimerCard 
-                    title={t.dashYogaTitle}
-                    initialMinutes={5} 
-                    bgClass="bg-rose-50/80 backdrop-blur-sm"
-                    borderClass="border-rose-100"
-                    textClass="text-rose-900"
-                    onComplete={() => setIsYogaDone(true)}
-                  />
+                  <div onClick={() => setActiveTab('YOGA')} className="bg-rose-50/80 backdrop-blur-sm rounded-2xl p-4 relative overflow-hidden flex items-center justify-between shadow-sm border border-rose-100 cursor-pointer hover:shadow-md transition-all group">
+                    <div className="relative z-10 w-full">
+                      <div className="flex items-center justify-between mb-2">
+                        <h3 className="font-bold text-rose-900">{t.dashYogaTitle}</h3>
+                        <span className="text-xl font-bold font-mono text-rose-400">05:00</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <div className="text-[10px] uppercase font-bold tracking-wider text-rose-400 group-hover:text-rose-600 transition-colors">Start Session</div>
+                        <div className="flex items-center gap-1">
+                          <div className="w-8 h-8 rounded-full bg-rose-200 text-rose-700 flex items-center justify-center transition-colors group-hover:bg-rose-600 group-hover:text-white shadow-sm pointer-events-none">
+                            <Play className="w-4 h-4 ml-0.5" />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </>
             )}
@@ -413,6 +541,7 @@ export const PatientDashboard: React.FC = () => {
                       size="large"
                       externalSelectedDay={selectedPastDay}
                       onSelectDay={setSelectedPastDay}
+                      appointments={[...appointments.upcoming, ...appointments.past]}
                     />
                   </div>
 
@@ -540,10 +669,7 @@ export const PatientDashboard: React.FC = () => {
                             domain={[0, 4]}
                             ticks={[0, 1, 2, 3, 4]}
                           />
-                          <Tooltip 
-                            contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
-                            formatter={(value: any) => [moodLabels[value as number], "Mood"]}
-                          />
+                          <Tooltip content={<CustomMoodTooltip />} />
                           <Line 
                             type="monotone" 
                             dataKey="mood" 
@@ -573,31 +699,92 @@ export const PatientDashboard: React.FC = () => {
                   </button>
                 </div>
                 
-                <div className="bg-white/70 backdrop-blur-xl rounded-3xl p-6 sm:p-8 border border-white shadow-sm space-y-6">
+                <div className="bg-white/70 backdrop-blur-xl rounded-3xl p-6 sm:p-8 border border-white shadow-sm space-y-8">
+                   
+                   {/* Upcoming Section */}
                    <div className="flex flex-col gap-4">
-                     {appointments.upcoming.length === 0 ? (
-                        <p className="text-slate-500 text-sm text-center py-8">No upcoming appointments.</p>
+                     <h3 className="font-bold text-slate-800 border-b border-slate-100 pb-2">Upcoming Sessions</h3>
+                     {computedUpcoming.length === 0 ? (
+                        <p className="text-slate-500 text-sm py-4">No upcoming appointments.</p>
                      ) : (
-                       appointments.upcoming.map(apt => (
+                       computedUpcoming.map(apt => (
                          <div key={apt.id} className="p-5 rounded-2xl bg-white border border-slate-100 flex flex-col md:flex-row justify-between md:items-center gap-4 hover:shadow-md transition-shadow">
                            <div className="flex gap-4 items-center">
-                             <div className="w-12 h-12 rounded-full bg-rose-50 text-rose-500 flex items-center justify-center shrink-0">
+                             <div className="w-12 h-12 rounded-full bg-indigo-50 text-indigo-500 flex items-center justify-center shrink-0">
                                <Video className="w-5 h-5"/>
                              </div>
                              <div>
-                                <h4 className="font-bold text-slate-800">{apt.type} with {apt.counselor}</h4>
-                                <p className="text-xs text-slate-500 mt-0.5">Manage in Counselor Tab</p>
+                                <h4 className="font-bold text-slate-800">{apt.type} with {apt.counsellor}</h4>
+                                <p className="text-xs text-slate-500 mt-0.5">Manage in Counsellor Tab</p>
                              </div>
                            </div>
                            <div className="flex flex-wrap items-center gap-4 text-sm font-semibold text-slate-600 shrink-0">
                               <div className="flex items-center gap-1.5 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-100"><CalendarIcon className="w-4 h-4 text-slate-400" /> {apt.date}</div>
                               <div className="flex items-center gap-1.5 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-100"><Clock className="w-4 h-4 text-slate-400" /> {apt.time}</div>
-                              <button onClick={() => setActiveTab('COUNSELOR')} className="px-4 py-2 bg-emerald-50 text-emerald-600 font-bold rounded-xl hover:bg-emerald-100 transition-colors border border-emerald-100">View</button>
+                              <button onClick={() => setActiveTab('COUNSELLOR')} className="px-4 py-2 bg-emerald-50 text-emerald-600 font-bold rounded-xl hover:bg-emerald-100 transition-colors border border-emerald-100">View</button>
                            </div>
                          </div>
                        ))
                      )}
                    </div>
+
+                   {/* Missed Section */}
+                   <div className="flex flex-col gap-4">
+                     <h3 className="font-bold text-slate-800 border-b border-slate-100 pb-2">Missed Sessions</h3>
+                     {computedMissed.length === 0 ? (
+                        <p className="text-slate-500 text-sm py-4">No missed appointments.</p>
+                     ) : (
+                       computedMissed.map(apt => (
+                         <div key={apt.id} className="p-5 rounded-2xl bg-rose-50/50 border border-rose-100 flex flex-col md:flex-row justify-between md:items-center gap-4 opacity-80">
+                           <div className="flex gap-4 items-center">
+                             <div className="w-12 h-12 rounded-full bg-rose-100 text-rose-500 flex items-center justify-center shrink-0">
+                               <Video className="w-5 h-5"/>
+                             </div>
+                             <div>
+                                <h4 className="font-bold text-slate-800">{apt.type} with {apt.counsellor}</h4>
+                                <p className="text-xs text-rose-500 mt-0.5 font-bold">Missed</p>
+                             </div>
+                           </div>
+                           <div className="flex flex-wrap items-center gap-4 text-sm font-semibold text-slate-600 shrink-0">
+                              <div className="flex items-center gap-1.5 bg-white px-3 py-1.5 rounded-lg border border-rose-100"><CalendarIcon className="w-4 h-4 text-rose-400" /> {apt.date}</div>
+                              <div className="flex items-center gap-1.5 bg-white px-3 py-1.5 rounded-lg border border-rose-100"><Clock className="w-4 h-4 text-rose-400" /> {apt.time}</div>
+                              <button onClick={() => setActiveTab('COUNSELLOR')} className="px-4 py-2 bg-rose-100 text-rose-700 font-bold rounded-xl hover:bg-rose-200 transition-colors border border-rose-200">Reschedule</button>
+                           </div>
+                         </div>
+                       ))
+                     )}
+                   </div>
+
+                </div>
+              </div>
+            )}
+
+            {/* YOGA TAB */}
+            {activeTab === 'YOGA' && (
+              <div className="space-y-6">
+                <div>
+                  <h2 className="text-2xl font-bold text-slate-800">{t.dashNavYoga}</h2>
+                  <p className="text-slate-500 text-sm">Practice mindfulness, breathing, and guided meditation.</p>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <TimerCard 
+                    title={t.dashReadingTitle}
+                    initialMinutes={7} 
+                    bgClass="bg-white/80 backdrop-blur-sm"
+                    borderClass="border-slate-200"
+                    textClass="text-slate-800"
+                    onComplete={() => setIsReadingDone(true)}
+                  />
+
+                  <TimerCard 
+                    title={t.dashYogaTitle}
+                    initialMinutes={5} 
+                    bgClass="bg-white/80 backdrop-blur-sm"
+                    borderClass="border-rose-100"
+                    textClass="text-rose-900"
+                    onComplete={() => setIsYogaDone(true)}
+                  />
                 </div>
               </div>
             )}
@@ -612,8 +799,13 @@ export const PatientDashboard: React.FC = () => {
                 
                 <div className="bg-emerald-50/80 backdrop-blur-xl rounded-3xl p-6 sm:p-8 border border-emerald-100 shadow-sm space-y-8">
                   <div className="flex flex-col md:flex-row items-center gap-8">
-                    <div className="w-24 h-24 rounded-full border-8 border-emerald-400 flex items-center justify-center font-bold text-emerald-800 text-3xl bg-white shadow-sm">
-                      {dailyGoalPercent}%
+                    <div 
+                      className="w-24 h-24 rounded-full flex items-center justify-center shadow-sm relative shrink-0"
+                      style={{ background: `conic-gradient(#34d399 ${dailyGoalPercent}%, #e2e8f0 ${dailyGoalPercent}%)` }}
+                    >
+                      <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center font-bold text-emerald-800 text-3xl absolute">
+                        {dailyGoalPercent}%
+                      </div>
                     </div>
                     <div className="text-center md:text-left">
                       <h3 className="font-bold text-emerald-950 text-xl">{t.dashGoalsGreat}</h3>
@@ -622,8 +814,18 @@ export const PatientDashboard: React.FC = () => {
                   </div>
                   
                   <div className="space-y-3">
-                    <h4 className="font-bold text-slate-800 text-sm mb-4">{t.dashChecklistTitle}</h4>
-                    {checklist.map(item => {
+                    <div className="flex items-center justify-between mb-4">
+                      <h4 className="font-bold text-slate-800 text-sm">{t.dashChecklistTitle}</h4>
+                      <button onClick={() => {
+                        const newGoal = window.prompt('Enter new goal:');
+                        if (newGoal && newGoal.trim()) {
+                          setChecklist((prev: any[]) => [...prev, { id: Date.now(), text: newGoal.trim(), done: false }]);
+                        }
+                      }} className="w-6 h-6 flex items-center justify-center rounded-full bg-emerald-100 text-emerald-700 hover:bg-emerald-200 transition-colors shadow-sm text-lg leading-none pb-0.5">
+                        +
+                      </button>
+                    </div>
+                    {checklist.map((item: any) => {
                       // Translate mock checklist items dynamically
                       let itemText = item.text;
                       if (itemText === 'Drink 2L Water') itemText = t.goalWater;
@@ -641,29 +843,19 @@ export const PatientDashboard: React.FC = () => {
                     )})}
                   </div>
 
-                  <div className="space-y-3 pt-4 border-t border-emerald-200/50">
-                    <h4 className="font-bold text-slate-800 text-sm mb-4">{t.dashCoreRoutines}</h4>
-                    <div className="flex items-center gap-4 bg-white p-4 rounded-2xl border border-emerald-100/60">
-                      <div className={`w-6 h-6 shrink-0 rounded-md flex items-center justify-center border ${isReadingDone ? 'bg-emerald-500 border-emerald-500 text-white shadow-sm' : 'border-emerald-200 bg-slate-50'}`}>
-                        {isReadingDone && <Check className="w-4 h-4" />}
-                      </div>
-                      <span className={`text-base ${isReadingDone ? 'text-emerald-700 line-through opacity-70' : 'text-emerald-950 font-medium'}`}>{t.dashReadingTitle} (7 min)</span>
-                    </div>
-                    <div className="flex items-center gap-4 bg-white p-4 rounded-2xl border border-emerald-100/60">
-                      <div className={`w-6 h-6 shrink-0 rounded-md flex items-center justify-center border ${isYogaDone ? 'bg-emerald-500 border-emerald-500 text-white shadow-sm' : 'border-emerald-200 bg-slate-50'}`}>
-                        {isYogaDone && <Check className="w-4 h-4" />}
-                      </div>
-                      <span className={`text-base ${isYogaDone ? 'text-emerald-700 line-through opacity-70' : 'text-emerald-950 font-medium'}`}>{t.dashYogaTitle} (5 min)</span>
-                    </div>
-                    <p className="text-xs text-emerald-600 font-semibold pt-2">{t.dashNoteTimers}</p>
-                  </div>
+
                 </div>
               </div>
             )}
 
-            {/* COUNSELOR TAB */}
-            {activeTab === 'COUNSELOR' && (
-              <CounselorTab appointments={appointments} setAppointments={setAppointments} />
+            {/* COUNSELLOR TAB */}
+            {activeTab === 'COUNSELLOR' && (
+              <CounsellorTab appointments={appointments} setAppointments={setAppointments} />
+            )}
+
+            {/* SUPPORT TAB */}
+            {activeTab === 'SUPPORT' && (
+              <SupportTab />
             )}
 
             {/* PROFILE TAB */}
@@ -697,7 +889,7 @@ export const PatientDashboard: React.FC = () => {
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="bg-slate-50 p-5 rounded-2xl border border-slate-100">
-                      <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Assigned Counselor</h4>
+                      <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Assigned Counsellor</h4>
                       <p className="font-bold text-slate-800 text-lg">Dr. Sarah Jenkins</p>
                       <p className="text-xs text-emerald-600 font-semibold mt-1">Clinical Psychologist</p>
                     </div>
@@ -705,8 +897,13 @@ export const PatientDashboard: React.FC = () => {
                     <div className="bg-emerald-50 p-5 rounded-2xl border border-emerald-100">
                       <h4 className="text-xs font-bold text-emerald-600/70 uppercase tracking-wider mb-2">Daily Goal Progress</h4>
                       <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 rounded-full border-4 border-emerald-400 flex items-center justify-center font-bold text-emerald-800 bg-white">
-                          {dailyGoalPercent}%
+                        <div 
+                          className="w-12 h-12 rounded-full flex items-center justify-center shadow-sm relative shrink-0"
+                          style={{ background: `conic-gradient(#34d399 ${dailyGoalPercent}%, #e2e8f0 ${dailyGoalPercent}%)` }}
+                        >
+                          <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center font-bold text-emerald-800 absolute">
+                            {dailyGoalPercent}%
+                          </div>
                         </div>
                         <p className="font-semibold text-emerald-900 text-sm">Keep up the good work today!</p>
                       </div>
@@ -715,13 +912,13 @@ export const PatientDashboard: React.FC = () => {
                     <div className="bg-indigo-50 p-5 rounded-2xl border border-indigo-100 md:col-span-2 flex justify-between items-center">
                       <div>
                         <h4 className="text-xs font-bold text-indigo-400 uppercase tracking-wider mb-1">Next Meeting</h4>
-                        {appointments.upcoming.length > 0 ? (
-                          <p className="font-bold text-indigo-900 text-lg">{appointments.upcoming[0].type} on {appointments.upcoming[0].date}</p>
+                        {computedUpcoming.length > 0 ? (
+                          <p className="font-bold text-indigo-900 text-lg">{computedUpcoming[0].type} on {new Date(computedUpcoming[0].date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}</p>
                         ) : (
                           <p className="font-bold text-indigo-900 text-lg">No upcoming meetings</p>
                         )}
                       </div>
-                      <button onClick={() => setActiveTab('COUNSELOR')} className="px-4 py-2 bg-indigo-600 text-white font-bold rounded-xl text-sm shadow-sm hover:bg-indigo-700">View</button>
+                      <button onClick={() => setActiveTab('COUNSELLOR')} className="px-4 py-2 bg-indigo-600 text-white font-bold rounded-xl text-sm shadow-sm hover:bg-indigo-700">View</button>
                     </div>
                   </div>
                 </div>
@@ -755,6 +952,7 @@ export const PatientDashboard: React.FC = () => {
                 hideModal={true}
                 onSelectDay={handleSidebarDayClick}
                 externalSelectedDay={activeTab === 'CALENDAR' ? selectedPastDay : null}
+                appointments={[...appointments.upcoming, ...appointments.past]}
               />
             </div>
 
@@ -766,27 +964,22 @@ export const PatientDashboard: React.FC = () => {
               </div>
               
               <div className="space-y-3">
-                <div className="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm space-y-3 transition-transform hover:-translate-y-0.5">
-                  <div className="space-y-1">
-                    <h4 className="font-bold text-sm text-slate-800">Session with a psychologist</h4>
-                    <p className="text-[10px] text-slate-500 leading-tight">Psychological blockages and barriers: how to overcome them</p>
-                  </div>
-                  <div className="pt-3 border-t border-dashed border-slate-100 flex items-center justify-between text-[10px] font-semibold text-slate-500">
-                    <div className="flex items-center gap-1.5"><CalendarIcon className="w-3 h-3 text-rose-400" /> 17 June</div>
-                    <div className="flex items-center gap-1.5"><Clock className="w-3 h-3 text-rose-400" /> 10:00</div>
-                  </div>
-                </div>
-                
-                <div className="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm space-y-3 transition-transform hover:-translate-y-0.5">
-                  <div className="space-y-1">
-                    <h4 className="font-bold text-sm text-slate-800">Webinar "Find a confidence"</h4>
-                    <p className="text-[10px] text-slate-500 leading-tight">Release the emotional baggage that's been holding you back</p>
-                  </div>
-                  <div className="pt-3 border-t border-dashed border-slate-100 flex items-center justify-between text-[10px] font-semibold text-slate-500">
-                    <div className="flex items-center gap-1.5"><CalendarIcon className="w-3 h-3 text-[#a3e635]" /> 20 June</div>
-                    <div className="flex items-center gap-1.5"><Clock className="w-3 h-3 text-[#a3e635]" /> 17:00</div>
-                  </div>
-                </div>
+                {computedUpcoming.length === 0 ? (
+                   <p className="text-slate-500 text-xs text-center py-4">No upcoming scheduled meetings.</p>
+                ) : (
+                   computedUpcoming.slice(0, 3).map(apt => (
+                    <div key={apt.id} className="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm space-y-3 transition-transform hover:-translate-y-0.5 cursor-pointer" onClick={() => setActiveTab('SCHEDULED')}>
+                      <div className="space-y-1">
+                        <h4 className="font-bold text-sm text-slate-800">{apt.type}</h4>
+                        <p className="text-[10px] text-slate-500 leading-tight">with {apt.counsellor}</p>
+                      </div>
+                      <div className="pt-3 border-t border-dashed border-slate-100 flex items-center justify-between text-[10px] font-semibold text-slate-500">
+                        <div className="flex items-center gap-1.5"><CalendarIcon className="w-3 h-3 text-indigo-400" /> {new Date(apt.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}</div>
+                        <div className="flex items-center gap-1.5"><Clock className="w-3 h-3 text-indigo-400" /> {apt.time}</div>
+                      </div>
+                    </div>
+                   ))
+                )}
               </div>
             </div>
 

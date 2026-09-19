@@ -96,9 +96,10 @@ interface Translations {
   dashNavInsights: string;
   dashNavScheduled: string;
   dashNavGoals: string;
-  dashNavCounselor: string;
+  dashNavCounsellor: string;
   dashNavSupport: string;
   dashNavProfile: string;
+  dashNavYoga: string;
   dashSearchPlaceholder: string;
   dashBannerTitle: string;
   dashBannerSub: string;
@@ -135,10 +136,10 @@ interface Translations {
   goalWalk: string;
   goalJournal: string;
   
-  counselorCenter: string;
-  counselorCenterSub: string;
-  counselorAvailable: string;
-  counselorRole: string;
+  counsellorCenter: string;
+  counsellorCenterSub: string;
+  counsellorAvailable: string;
+  counsellorRole: string;
   viewProfileBtn: string;
   recommendationsTitle: string;
   tasksBadge: string;
@@ -278,9 +279,10 @@ const TRANSLATIONS: Record<SupportedLanguage, Translations> = {
     dashNavInsights: "Mood Insights",
     dashNavScheduled: "Scheduled",
     dashNavGoals: "Goals",
-    dashNavCounselor: "Counselor",
+    dashNavCounsellor: "Counsellor",
     dashNavSupport: "Support",
     dashNavProfile: "Profile",
+    dashNavYoga: "Yoga and Meditation",
     dashSearchPlaceholder: "Search something...",
     dashBannerTitle: "How do you feel, ",
     dashBannerSub: "Please, mark your mood today",
@@ -316,14 +318,14 @@ const TRANSLATIONS: Record<SupportedLanguage, Translations> = {
     goalMeds: "Take prescribed medication",
     goalWalk: "30 min walk",
     goalJournal: "Write in journal",
-    counselorCenter: "Counselor Center",
-    counselorCenterSub: "Connect with your therapist, track recommendations, and generate reports.",
-    counselorAvailable: "Available Online",
-    counselorRole: "Clinical Psychologist",
+    counsellorCenter: "Counsellor Center",
+    counsellorCenterSub: "Connect with your therapist, track recommendations, and generate reports.",
+    counsellorAvailable: "Available Online",
+    counsellorRole: "Clinical Psychologist",
     viewProfileBtn: "View Profile",
     recommendationsTitle: "Recommendations",
     tasksBadge: "Tasks",
-    chatTitle: "Counselor Chat",
+    chatTitle: "Counsellor Chat",
     privateBadge: "Private",
     shareLogsBtn: "Share Logs",
     typeMessagePlaceholder: "Type a message...",
@@ -333,7 +335,7 @@ const TRANSLATIONS: Record<SupportedLanguage, Translations> = {
     rescheduleBtn: "Reschedule",
     cancelBtn: "Cancel",
     reportTitle: "Shareable Mental Health Report",
-    reportSub: "Generate a comprehensive summary of your check-ins to share with your counselor for better guidance.",
+    reportSub: "Generate a comprehensive summary of your check-ins to share with your counsellor for better guidance.",
     startDate: "Start Date",
     endDate: "End Date",
     includeInReport: "Include in report:",
@@ -457,9 +459,10 @@ const TRANSLATIONS: Record<SupportedLanguage, Translations> = {
     dashNavInsights: "मूड इनसाइट्स",
     dashNavScheduled: "निर्धारित",
     dashNavGoals: "लक्ष्य",
-    dashNavCounselor: "काउंसलर",
+    dashNavCounsellor: "काउंसलर",
     dashNavSupport: "सहायता",
     dashNavProfile: "प्रोफ़ाइल",
+    dashNavYoga: "योग और ध्यान",
     dashSearchPlaceholder: "कुछ खोजें...",
     dashBannerTitle: "आप कैसा महसूस कर रहे हैं, ",
     dashBannerSub: "कृपया, आज अपना मूड दर्ज करें",
@@ -495,10 +498,10 @@ const TRANSLATIONS: Record<SupportedLanguage, Translations> = {
     goalMeds: "निर्धारित दवा लें",
     goalWalk: "30 मिनट की सैर",
     goalJournal: "जर्नल में लिखें",
-    counselorCenter: "काउंसलर केंद्र",
-    counselorCenterSub: "अपने थेरेपिस्ट से जुड़ें, अनुशंसाओं को ट्रैक करें, और रिपोर्ट तैयार करें।",
-    counselorAvailable: "ऑनलाइन उपलब्ध",
-    counselorRole: "नैदानिक मनोवैज्ञानिक",
+    counsellorCenter: "काउंसलर केंद्र",
+    counsellorCenterSub: "अपने थेरेपिस्ट से जुड़ें, अनुशंसाओं को ट्रैक करें, और रिपोर्ट तैयार करें।",
+    counsellorAvailable: "ऑनलाइन उपलब्ध",
+    counsellorRole: "नैदानिक मनोवैज्ञानिक",
     viewProfileBtn: "प्रोफ़ाइल देखें",
     recommendationsTitle: "अनुशंसाएं",
     tasksBadge: "कार्य",

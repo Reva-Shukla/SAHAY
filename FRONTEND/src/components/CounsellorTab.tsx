@@ -9,17 +9,17 @@ export interface Appointment {
   id: number;
   date: string;
   time: string;
-  counselor: string;
+  counsellor: string;
   type: string;
   status?: string;
 }
 
-interface CounselorTabProps {
+interface CounsellorTabProps {
   appointments: { upcoming: Appointment[], past: Appointment[] };
   setAppointments: React.Dispatch<React.SetStateAction<{ upcoming: Appointment[], past: Appointment[] }>>;
 }
 
-export const CounselorTab: React.FC<CounselorTabProps> = ({ appointments, setAppointments }) => {
+export const CounsellorTab: React.FC<CounsellorTabProps> = ({ appointments, setAppointments }) => {
   const { t } = useLanguage();
 
   // 1. Recommendations State
@@ -73,7 +73,7 @@ export const CounselorTab: React.FC<CounselorTabProps> = ({ appointments, setApp
 
   // 3. Chat State
   const [messages, setMessages] = useState<any[]>([
-    { id: 1, text: 'Hello Kalash, how have you been feeling this week?', sender: 'counselor', time: '10:00 AM', type: 'text' },
+    { id: 1, text: 'Hello Kalash, how have you been feeling this week?', sender: 'counsellor', time: '10:00 AM', type: 'text' },
     { id: 2, text: 'I have been a bit stressed about work, but the breathing exercises help.', sender: 'patient', time: '10:15 AM', type: 'text' }
   ]);
   const [newMessage, setNewMessage] = useState('');
@@ -137,7 +137,7 @@ export const CounselorTab: React.FC<CounselorTabProps> = ({ appointments, setApp
   };
 
   const handleShareEntry = () => {
-    const msg = `Shared Journal & Mood logs with counselor.`;
+    const msg = `Shared Journal & Mood logs with counsellor.`;
     setMessages([...messages, { id: Date.now(), text: msg, sender: 'patient', time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }), type: 'text' }]);
     setShowShareModal(false);
   };
@@ -176,8 +176,8 @@ ${reportState.mood ? '• Average Mood: Good\n' : ''}${reportState.sleep ? '• 
   return (
     <div className="space-y-6 pb-12">
       <div>
-        <h2 className="text-2xl font-bold text-slate-800">{t.counselorCenter}</h2>
-        <p className="text-slate-500 text-sm">{t.counselorCenterSub}</p>
+        <h2 className="text-2xl font-bold text-slate-800">{t.counsellorCenter}</h2>
+        <p className="text-slate-500 text-sm">{t.counsellorCenterSub}</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -185,7 +185,7 @@ ${reportState.mood ? '• Average Mood: Good\n' : ''}${reportState.sleep ? '• 
         {/* Left Column: Profile & Recommendations */}
         <div className="lg:col-span-1 space-y-6">
           
-          {/* Counselor Profile */}
+          {/* Counsellor Profile */}
           <div className="bg-white/70 backdrop-blur-xl rounded-3xl p-6 shadow-sm border border-white space-y-4">
             <div className="flex items-center gap-4">
               <div className="w-16 h-16 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold text-xl relative">
@@ -194,8 +194,8 @@ ${reportState.mood ? '• Average Mood: Good\n' : ''}${reportState.sleep ? '• 
               </div>
               <div>
                 <h3 className="font-bold text-slate-800 text-lg">Dr. Sarah Jenkins</h3>
-                <p className="text-emerald-600 text-xs font-bold uppercase tracking-wider">{t.counselorAvailable}</p>
-                <p className="text-slate-500 text-xs mt-0.5">{t.counselorRole}</p>
+                <p className="text-emerald-600 text-xs font-bold uppercase tracking-wider">{t.counsellorAvailable}</p>
+                <p className="text-slate-500 text-xs mt-0.5">{t.counsellorRole}</p>
               </div>
             </div>
             <div className="flex gap-2 pt-2">
@@ -311,7 +311,7 @@ ${reportState.mood ? '• Average Mood: Good\n' : ''}${reportState.sleep ? '• 
               <div key={apt.id} className="p-4 bg-emerald-50/50 border border-emerald-100 rounded-2xl flex flex-col sm:flex-row justify-between sm:items-center gap-4">
                 <div>
                   <h5 className="font-bold text-slate-800">{apt.type}</h5>
-                  <p className="text-xs text-slate-500 mt-0.5">{apt.counselor}</p>
+                  <p className="text-xs text-slate-500 mt-0.5">{apt.counsellor}</p>
                   <div className="flex items-center gap-2 mt-2 text-xs font-semibold text-emerald-700">
                     <span className="flex items-center gap-1"><Calendar className="w-3.5 h-3.5" /> {apt.date}</span>
                     <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5" /> {apt.time}</span>
@@ -330,7 +330,7 @@ ${reportState.mood ? '• Average Mood: Good\n' : ''}${reportState.sleep ? '• 
             {appointments.past.map(apt => (
               <div key={apt.id} className="p-4 bg-slate-50 border border-slate-100 rounded-2xl flex justify-between items-center opacity-80">
                 <div>
-                  <h5 className="font-bold text-slate-800 text-sm">{apt.counselor}</h5>
+                  <h5 className="font-bold text-slate-800 text-sm">{apt.counsellor}</h5>
                   <div className="flex items-center gap-2 mt-1 text-xs font-medium text-slate-500">
                     <span>{apt.date}</span> • <span>{apt.time}</span>
                   </div>
@@ -419,7 +419,7 @@ ${reportState.mood ? '• Average Mood: Good\n' : ''}${reportState.sleep ? '• 
         <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl p-6 max-w-sm w-full shadow-xl">
             <h3 className="font-bold text-lg mb-2">{t.rescheduleTitle}</h3>
-            <p className="text-sm text-slate-500 mb-4">You are requesting to reschedule your {selectedApt?.type} with {selectedApt?.counselor}.</p>
+            <p className="text-sm text-slate-500 mb-4">You are requesting to reschedule your {selectedApt?.type} with {selectedApt?.counsellor}.</p>
             
             <label className="text-xs font-bold text-slate-500 mb-1 block">Date</label>
             <input type="date" value={rescheduleDate} onChange={e => setRescheduleDate(e.target.value)} className="w-full border border-slate-200 p-2 rounded-xl mb-4 text-sm" />
@@ -458,7 +458,7 @@ ${reportState.mood ? '• Average Mood: Good\n' : ''}${reportState.sleep ? '• 
         <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl p-6 max-w-sm w-full shadow-xl">
             <h3 className="font-bold text-lg mb-2 text-rose-600">{t.cancelTitle}</h3>
-            <p className="text-sm text-slate-500 mb-4">Are you sure you want to cancel your session with {selectedApt?.counselor}?</p>
+            <p className="text-sm text-slate-500 mb-4">Are you sure you want to cancel your session with {selectedApt?.counsellor}?</p>
             <div className="flex gap-2">
               <button onClick={() => setShowCancel(false)} className="flex-1 py-2 bg-slate-100 text-slate-700 font-bold rounded-xl text-sm hover:bg-slate-200">{t.keepItBtn}</button>
               <button onClick={confirmCancel} className="flex-1 py-2 bg-rose-600 text-white font-bold rounded-xl text-sm hover:bg-rose-700">{t.yesCancelBtn}</button>

@@ -24,8 +24,8 @@ export const getMoodEmoji = (mood: string) => {
   }
 };
 
-// Generate some mock history for Sept 2026
-const MOCK_HISTORY: PastCheckIn[] = [
+// Generate some mock history as fallback
+const DEFAULT_MOCK_HISTORY: PastCheckIn[] = [
   { date: '2026-09-01', mood: 'Low', journal: 'Hard day at work.', energy: 3, stress: 8, sleep: '5h 30m' },
   { date: '2026-09-02', mood: 'Neutral', journal: 'Felt a bit better today.', energy: 5, stress: 6, sleep: '6h 45m' },
   { date: '2026-09-03', mood: 'Neutral', journal: '', energy: 4, stress: 5, sleep: '7h 00m' },
@@ -35,6 +35,28 @@ const MOCK_HISTORY: PastCheckIn[] = [
   { date: '2026-09-08', mood: 'Neutral', journal: 'Normal day.', energy: 5, stress: 5, sleep: '6h 30m' },
   { date: '2026-09-09', mood: 'Good', journal: 'Finished my project!', energy: 9, stress: 4, sleep: '7h 10m' },
 ];
+
+const getHistory = (): PastCheckIn[] => {
+  const phone = localStorage.getItem('sahay_active_user_phone');
+  if (!phone) return DEFAULT_MOCK_HISTORY;
+  const histStr = localStorage.getItem(`sahay_history_${phone}`);
+  if (histStr) {
+    try {
+      const parsed = JSON.parse(histStr);
+      // Ensure DEFAULT_MOCK_HISTORY is included so calendar doesn't look empty initially
+      const combined = [...DEFAULT_MOCK_HISTORY];
+      for (const checkIn of parsed) {
+        if (!combined.find(c => c.date === checkIn.date)) {
+          combined.push(checkIn);
+        }
+      }
+      return combined;
+    } catch (e) {
+      return DEFAULT_MOCK_HISTORY;
+    }
+  }
+  return DEFAULT_MOCK_HISTORY;
+};
 
 interface Props {
   currentCheckIn?: {
@@ -46,9 +68,10 @@ interface Props {
   onSelectDay?: (day: PastCheckIn | null) => void;
   hideModal?: boolean;
   size?: 'small' | 'large';
+  appointments?: any[];
 }
 
-export const CheckInCalendar: React.FC<Props> = ({ currentCheckIn, externalSelectedDay, onSelectDay, hideModal, size = 'small' }) => {
+export const CheckInCalendar: React.FC<Props> = ({ currentCheckIn, externalSelectedDay, onSelectDay, hideModal, size = 'small', appointments = [] }) => {
   const [currentDate, setCurrentDate] = useState(new Date(2026, 8, 10)); // Sept 10, 2026
   const [internalSelectedDay, setInternalSelectedDay] = useState<PastCheckIn | null>(null);
 
@@ -56,7 +79,7 @@ export const CheckInCalendar: React.FC<Props> = ({ currentCheckIn, externalSelec
   const handleSetSelectedDay = onSelectDay || setInternalSelectedDay;
 
   // Combine mock history with current check-in if provided
-  const allHistory = [...MOCK_HISTORY];
+  const allHistory = getHistory();
   if (currentCheckIn) {
     const existingIdx = allHistory.findIndex(h => h.date === currentCheckIn.date);
     const newEntry: PastCheckIn = {
@@ -136,15 +159,19 @@ export const CheckInCalendar: React.FC<Props> = ({ currentCheckIn, externalSelec
         {days.map(day => {
           const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
           const entry = allHistory.find(h => h.date === dateStr);
+          const dayAppointments = appointments.filter(a => a.date === dateStr && a.status !== 'Completed');
           const isSelected = selectedDay?.date === dateStr;
           
           return (
             <div 
               key={day} 
               onClick={() => handleDayClick(day)}
-              className={`flex flex-col items-center justify-center cursor-pointer group rounded-xl transition-all ${isLarge ? 'p-2' : 'p-1'} ${isSelected ? 'bg-indigo-50 border border-indigo-100 ring-1 ring-indigo-200 shadow-sm' : 'hover:bg-slate-50'}`}
+              className={`flex flex-col items-center justify-center cursor-pointer group rounded-xl transition-all relative ${isLarge ? 'p-2' : 'p-1'} ${isSelected ? 'bg-indigo-50 border border-indigo-100 ring-1 ring-indigo-200 shadow-sm' : 'hover:bg-slate-50'}`}
             >
-              <span className={`font-semibold ${entry ? 'text-slate-700' : 'text-slate-300'} ${isLarge ? 'text-base mb-1' : 'text-xs mb-0.5'}`}>
+              {dayAppointments.length > 0 && (
+                <div className="absolute top-1 right-1 w-1.5 h-1.5 sm:w-2 sm:h-2 bg-indigo-500 rounded-full shadow-sm animate-pulse" title={`${dayAppointments.length} meeting(s)`} />
+              )}
+              <span className={`font-semibold ${entry || dayAppointments.length > 0 ? 'text-slate-700' : 'text-slate-300'} ${isLarge ? 'text-base mb-1' : 'text-xs mb-0.5'}`}>
                 {day}
               </span>
               <div className={`flex items-center justify-center ${isLarge ? 'h-6' : 'h-5'}`}>
