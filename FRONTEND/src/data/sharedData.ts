@@ -1,4 +1,47 @@
-import type { ChatMessage, CounsellorMeeting, SOSAlert, SharedMentalHealthReport } from '../types';
+import type { ChatMessage, CounsellorMeeting, SOSAlert, SharedMentalHealthReport, SharedGoal } from '../types';
+
+export const INITIAL_MOCK_GOALS: SharedGoal[] = [
+  {
+    id: "goal-101",
+    caseId: "Case #4821",
+    title: "10-minute breathing exercise",
+    description: "Focus on deep abdominal breathing twice daily.",
+    assignedBy: "counsellor",
+    dueDate: "2026-09-22",
+    completed: false,
+    createdAt: "2026-09-18"
+  },
+  {
+    id: "goal-102",
+    caseId: "Case #4821",
+    title: "Write 3 things you are grateful for",
+    description: "Gratitude journaling before bedtime.",
+    assignedBy: "counsellor",
+    dueDate: "2026-09-20",
+    completed: true,
+    createdAt: "2026-09-19"
+  },
+  {
+    id: "goal-103",
+    caseId: "Case #4821",
+    title: "Drink 2L Water",
+    description: "Stay hydrated throughout the day.",
+    assignedBy: "patient",
+    dueDate: "Daily",
+    completed: false,
+    createdAt: "2026-09-20"
+  },
+  {
+    id: "goal-104",
+    caseId: "Case #4821",
+    title: "30 min evening walk",
+    description: "Light walk in nature.",
+    assignedBy: "patient",
+    dueDate: "Daily",
+    completed: true,
+    createdAt: "2026-09-20"
+  }
+];
 
 export const INITIAL_MOCK_CHATS: Record<string, ChatMessage[]> = {
   "Case #4821": [
@@ -85,6 +128,18 @@ export const INITIAL_MOCK_CHATS: Record<string, ChatMessage[]> = {
 
 export const INITIAL_MOCK_MEETINGS: CounsellorMeeting[] = [
   {
+    id: "MTG-900",
+    caseId: "Case #4821",
+    patientAlias: "Victim H-104",
+    date: "2026-09-23",
+    time: "02:00 PM",
+    status: "pending",
+    type: "Video Consultation",
+    riskLevel: "RED",
+    notes: "Patient requested session for anxiety consultation.",
+    meetUrl: "https://meet.google.com/sah-aytm-mtg"
+  },
+  {
     id: "MTG-901",
     caseId: "Case #4821",
     patientAlias: "Victim H-104",
@@ -93,7 +148,8 @@ export const INITIAL_MOCK_MEETINGS: CounsellorMeeting[] = [
     status: "upcoming",
     type: "Crisis Check-in",
     riskLevel: "RED",
-    notes: "Urgent crisis triage review following voice sentiment alert."
+    notes: "Urgent crisis triage review following voice sentiment alert.",
+    meetUrl: "https://meet.google.com/sah-aytm-mtg"
   },
   {
     id: "MTG-902",
@@ -104,7 +160,8 @@ export const INITIAL_MOCK_MEETINGS: CounsellorMeeting[] = [
     status: "upcoming",
     type: "Video Consultation",
     riskLevel: "RED",
-    notes: "Follow-up on recent livelihood loss trauma."
+    notes: "Follow-up on recent livelihood loss trauma.",
+    meetUrl: "https://meet.google.com/sah-aytm-mtg"
   },
   {
     id: "MTG-903",
@@ -115,7 +172,8 @@ export const INITIAL_MOCK_MEETINGS: CounsellorMeeting[] = [
     status: "upcoming",
     type: "Weekly Therapy",
     riskLevel: "YELLOW",
-    notes: "Routine weekly CBT session."
+    notes: "Routine weekly CBT session.",
+    meetUrl: "https://meet.google.com/sah-aytm-mtg"
   },
   {
     id: "MTG-904",
@@ -126,7 +184,8 @@ export const INITIAL_MOCK_MEETINGS: CounsellorMeeting[] = [
     status: "missed",
     type: "Audio Follow-up",
     riskLevel: "RED",
-    notes: "Patient did not answer tele-consultation call."
+    notes: "Patient did not answer tele-consultation call.",
+    meetUrl: "https://meet.google.com/sah-aytm-mtg"
   },
   {
     id: "MTG-905",
@@ -137,7 +196,8 @@ export const INITIAL_MOCK_MEETINGS: CounsellorMeeting[] = [
     status: "missed",
     type: "Video Consultation",
     riskLevel: "RED",
-    notes: "Repeat no-show — 2nd consecutive missed session."
+    notes: "Repeat no-show — 2nd consecutive missed session.",
+    meetUrl: "https://meet.google.com/sah-aytm-mtg"
   },
   {
     id: "MTG-906",
@@ -148,7 +208,8 @@ export const INITIAL_MOCK_MEETINGS: CounsellorMeeting[] = [
     status: "completed",
     type: "Weekly Therapy",
     riskLevel: "GREEN",
-    notes: "Mindfulness modules reviewed successfully."
+    notes: "Mindfulness modules reviewed successfully.",
+    meetUrl: "https://meet.google.com/sah-aytm-mtg"
   }
 ];
 

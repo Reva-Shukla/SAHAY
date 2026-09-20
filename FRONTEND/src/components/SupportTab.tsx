@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { 
   AlertTriangle, Phone, Search, Users, Wind, Shield, 
-  Database, FileText, MessageSquareWarning, X, HeartPulse
+  Database, FileText, MessageSquareWarning, X, HeartPulse, CheckCircle2
 } from 'lucide-react';
+import { useLanguage } from '../context/LanguageContext';
 
 interface TrustedContact {
   name: string;
@@ -11,7 +12,16 @@ interface TrustedContact {
 }
 
 export const SupportTab: React.FC = () => {
+  const { t } = useLanguage();
   const [activeModal, setActiveModal] = useState<string | null>(null);
+
+  // Report a Problem State
+  const [reportIssueType, setReportIssueType] = useState('');
+  const [reportDescription, setReportDescription] = useState('');
+  const [reportEmail, setReportEmail] = useState('');
+  const [reportPhone, setReportPhone] = useState('');
+  const [reportError, setReportError] = useState<string | null>(null);
+  const [reportSuccess, setReportSuccess] = useState(false);
 
   // Trusted Contact State
   const [trustedContact, setTrustedContact] = useState<TrustedContact | null>(() => {
@@ -90,6 +100,38 @@ export const SupportTab: React.FC = () => {
     setActiveModal(null);
     setIsBreathingActive(false);
     setTimeLeft(60);
+  };
+
+  const triggerStillNeedHelp = () => {
+    setActiveModal('support_options');
+    try {
+      const savedChats = localStorage.getItem('sahay_chats');
+      const chats = savedChats ? JSON.parse(savedChats) : {};
+      const defaultCaseId = "Case #4821";
+      const timestamp = Date.now();
+      const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      const urgentMsg = {
+        id: `urgent-${timestamp}`,
+        caseId: defaultCaseId,
+        text: "🚨 I Still Need Help - Patient requested urgent assistance",
+        sender: "patient",
+        time: timeStr,
+        timestamp,
+        type: "text",
+        isHighPriority: true
+      };
+      
+      chats[defaultCaseId] = [...(chats[defaultCaseId] || []), urgentMsg];
+      localStorage.setItem('sahay_chats', JSON.stringify(chats));
+
+      const highPriorityCases = JSON.parse(localStorage.getItem('sahay_high_priority_cases') || '[]');
+      if (!highPriorityCases.includes(defaultCaseId)) {
+        highPriorityCases.push(defaultCaseId);
+        localStorage.setItem('sahay_high_priority_cases', JSON.stringify(highPriorityCases));
+      }
+    } catch (err) {
+      console.error("Error triggering high priority chat flag:", err);
+    }
   };
 
   return (
@@ -277,17 +319,101 @@ export const SupportTab: React.FC = () => {
                <MessageSquareWarning className="w-5 h-5 text-amber-500" />
                <h4 className="font-bold text-slate-900">Report a Problem</h4>
              </div>
-             <form onSubmit={(e) => { e.preventDefault(); alert('Thank you. Your concern has been recorded.'); e.currentTarget.reset(); }} className="space-y-3">
-               <select className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500" required>
-                 <option value="">Select issue type</option>
-                 <option value="technical">Technical Issue</option>
-                 <option value="privacy">Privacy Concern</option>
-                 <option value="other">Other</option>
-               </select>
-               <textarea placeholder="Describe the issue..." rows={3} className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500" required></textarea>
-               <input type="email" placeholder="Email (optional)" className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500" />
-               <button type="submit" className="w-full py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl text-sm transition-colors">Submit Report</button>
-             </form>
+             {reportSuccess ? (
+               <div className="bg-emerald-50 border border-emerald-100 rounded-2xl p-4 text-center space-y-2">
+                 <CheckCircle2 className="w-8 h-8 text-emerald-600 mx-auto" />
+                 <h5 className="font-bold text-emerald-900 text-sm">{t.reportSubmittedSuccess}</h5>
+                 <button
+                   onClick={() => { setReportSuccess(false); setReportIssueType(''); setReportDescription(''); setReportEmail(''); setReportPhone(''); }}
+                   className="text-xs font-bold text-emerald-700 hover:underline pt-1"
+                 >
+                   Submit another report
+                 </button>
+               </div>
+             ) : (
+               <form 
+                 onSubmit={(e) => {
+                   e.preventDefault();
+                   setReportError(null);
+                   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                   if (!emailRegex.test(reportEmail.trim())) {
+                     setReportError(t.emailRequiredErr);
+                     return;
+                   }
+                   const cleanPhone = reportPhone.replace(/[\s-]/g, '');
+                   if (cleanPhone.length < 10) {
+                     setReportError(t.phoneRequiredErr);
+                     return;
+                   }
+
+                   try {
+                     const existing = JSON.parse(localStorage.getItem('sahay_problem_reports') || '[]');
+                     const newReport = {
+                       id: `rep-${Date.now()}`,
+                       issueType: reportIssueType,
+                       description: reportDescription.trim(),
+                       email: reportEmail.trim(),
+                       phone: reportPhone.trim(),
+                       timestamp: new Date().toISOString()
+                     };
+                     localStorage.setItem('sahay_problem_reports', JSON.stringify([...existing, newReport]));
+                     setReportSuccess(true);
+                   } catch (err) {
+                     console.error("Failed to save report", err);
+                   }
+                 }} 
+                 className="space-y-3"
+               >
+                 {reportError && (
+                   <div className="p-3 bg-rose-50 border border-rose-100 text-rose-700 rounded-xl text-xs font-bold">
+                     {reportError}
+                   </div>
+                 )}
+                 <select 
+                   value={reportIssueType}
+                   onChange={e => setReportIssueType(e.target.value)}
+                   className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500" 
+                   required
+                 >
+                   <option value="">Select issue type</option>
+                   <option value="technical">Technical Issue</option>
+                   <option value="privacy">Privacy Concern</option>
+                   <option value="counsellor">Counsellor Interaction</option>
+                   <option value="other">Other Concern</option>
+                 </select>
+                 <textarea 
+                   value={reportDescription}
+                   onChange={e => setReportDescription(e.target.value)}
+                   placeholder="Describe the issue..." 
+                   rows={3} 
+                   className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500" 
+                   required
+                 ></textarea>
+                 <div>
+                   <label className="text-[11px] font-bold text-slate-500 block mb-1">{t.emailLabel} *</label>
+                   <input 
+                     type="email" 
+                     value={reportEmail}
+                     onChange={e => setReportEmail(e.target.value)}
+                     placeholder="e.g. user@example.com" 
+                     className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500" 
+                     required 
+                   />
+                 </div>
+                 <div>
+                   <label className="text-[11px] font-bold text-slate-500 block mb-1">{t.phoneLabelRequired} *</label>
+                   <input 
+                     type="tel" 
+                     value={reportPhone}
+                     onChange={e => setReportPhone(e.target.value)}
+                     placeholder="e.g. 9876543210" 
+                     className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500" 
+                     required 
+                   />
+                 </div>
+                 <button type="submit" className="w-full py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl text-sm transition-colors">Submit Report</button>
+               </form>
+             )}
           </div>
 
         </div>
@@ -337,7 +463,7 @@ export const SupportTab: React.FC = () => {
 
                 <div className="flex flex-col sm:flex-row gap-3 pt-6 border-t border-slate-100">
                   <button onClick={closeModal} className="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-sm transition-colors">I'm Feeling Better</button>
-                  <button onClick={() => setActiveModal('support_options')} className="flex-1 py-2.5 bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold rounded-xl text-sm transition-colors">I Still Need Help</button>
+                  <button onClick={triggerStillNeedHelp} className="flex-1 py-2.5 bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold rounded-xl text-sm transition-colors">I Still Need Help</button>
                 </div>
               </div>
             )}
@@ -347,6 +473,9 @@ export const SupportTab: React.FC = () => {
               <div className="text-center space-y-6 pt-2">
                 <AlertTriangle className="w-12 h-12 text-rose-500 mx-auto" />
                 <h3 className="text-xl font-bold text-slate-900">Still Need Help?</h3>
+                <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-xs text-rose-800 font-bold">
+                  🚨 High-priority alert sent to your assigned counsellor's chat inbox.
+                </div>
                 <p className="text-sm text-slate-600">Please choose an option to connect with someone right away.</p>
                 <div className="space-y-3">
                   <button onClick={confirmEmergencyCall} className="w-full py-3 bg-rose-600 text-white font-bold rounded-xl hover:bg-rose-700 transition-colors">Call Emergency (112)</button>

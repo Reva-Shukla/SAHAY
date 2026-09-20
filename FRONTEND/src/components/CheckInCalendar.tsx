@@ -10,6 +10,7 @@ export interface PastCheckIn {
   energy: number; // 0-10
   stress: number; // 0-10
   sleep: string; // e.g. "7h 20m"
+  hasVoiceNote?: boolean;
 }
 
 // Helper to map mood to emoji
@@ -72,7 +73,7 @@ interface Props {
 }
 
 export const CheckInCalendar: React.FC<Props> = ({ currentCheckIn, externalSelectedDay, onSelectDay, hideModal, size = 'small', appointments = [] }) => {
-  const [currentDate, setCurrentDate] = useState(new Date(2026, 8, 10)); // Sept 10, 2026
+  const [currentDate, setCurrentDate] = useState(new Date());
   const [internalSelectedDay, setInternalSelectedDay] = useState<PastCheckIn | null>(null);
 
   const selectedDay = externalSelectedDay !== undefined ? externalSelectedDay : internalSelectedDay;
@@ -189,7 +190,7 @@ export const CheckInCalendar: React.FC<Props> = ({ currentCheckIn, externalSelec
       {/* Bottom info section */}
       {!isLarge && (
         <div className="mt-6 pt-3 border-t border-slate-200 border-dashed text-center space-y-2">
-          <p className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">TODAY — {monthNames[month]} 10</p>
+          <p className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">TODAY — {new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</p>
           <div className="text-xs font-medium text-slate-600">Daily check-in streak: <span className="text-emerald-500 font-bold">12 Days 🔥</span></div>
         </div>
       )}

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { 
   LayoutDashboard, Calendar as CalendarIcon, Target, Users, 
   MessageSquare, LogOut, ChevronRight,
-  Clock, Play, Pause, HeartPulse, Search, Check, TrendingUp, Moon, Zap, Smile, X, Activity, Globe, Video, User, RotateCcw, Wind
+  Clock, Play, HeartPulse, Search, Check, TrendingUp, Moon, Zap, Smile, X, Activity, Globe, Video, User, Wind
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { 
@@ -10,9 +10,13 @@ import {
 } from 'recharts';
 import { CheckInCalendar, getMoodEmoji } from '../components/CheckInCalendar';
 import type { PastCheckIn } from '../components/CheckInCalendar';
+import type { MoodType } from '../components/MoodSelector';
 import { useLanguage } from '../context/LanguageContext';
 import { CounsellorTab } from '../components/CounsellorTab';
 import { SupportTab } from '../components/SupportTab';
+import { YogaSection } from '../components/YogaSection';
+import { INITIAL_MOCK_GOALS, INITIAL_MOCK_MEETINGS } from '../data/sharedData';
+import type { SharedGoal, CounsellorMeeting } from '../types';
 
 const mockMoodData = [
   { date: '8', mood: 2, label: 'Normal', sleep: '6h', energy: 'Medium' },
@@ -26,105 +30,7 @@ const mockMoodData = [
 
 const moodLabels = ['Terrible', 'Bad', 'Normal', 'Great', 'Amazing'];
 
-interface TimerCardProps {
-  title: string;
-  initialMinutes: number;
-  bgClass: string;
-  borderClass: string;
-  textClass: string;
-  onComplete: () => void;
-}
 
-const TimerCard: React.FC<TimerCardProps> = ({ title, initialMinutes, bgClass, borderClass, textClass, onComplete }) => {
-  const [minutes, setMinutes] = useState(initialMinutes);
-  const [timeLeft, setTimeLeft] = useState(initialMinutes * 60);
-  const [isRunning, setIsRunning] = useState(false);
-  const [isDone, setIsDone] = useState(false);
-
-  useEffect(() => {
-    let interval: any;
-    if (isRunning && timeLeft > 0) {
-      interval = setInterval(() => {
-        setTimeLeft((prev) => {
-          if (prev <= 1) {
-            clearInterval(interval);
-            setIsRunning(false);
-            if (!isDone) {
-              setIsDone(true);
-              onComplete();
-            }
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
-    }
-    return () => clearInterval(interval);
-  }, [isRunning, timeLeft, onComplete, isDone]);
-
-  const handlePlus = () => {
-    if (!isRunning && !isDone) {
-      setMinutes(m => m + 1);
-      setTimeLeft(t => t + 60);
-    }
-  };
-
-  const handleMinus = () => {
-    if (!isRunning && !isDone && minutes > 1) {
-      setMinutes(m => m - 1);
-      setTimeLeft(t => t - 60);
-    }
-  };
-
-  const handleReset = () => {
-    setIsRunning(false);
-    setTimeLeft(minutes * 60);
-    setIsDone(false);
-  };
-
-  const formatTime = (seconds: number) => {
-    const m = Math.floor(seconds / 60);
-    const s = seconds % 60;
-    return `${m}:${s < 10 ? '0' : ''}${s}`;
-  };
-
-  const isPaused = !isRunning && timeLeft < minutes * 60 && !isDone;
-
-  return (
-    <div className={`${bgClass} rounded-2xl p-4 relative overflow-hidden flex items-center justify-between shadow-sm border ${borderClass}`}>
-      <div className="relative z-10 w-full">
-        <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center gap-1.5">
-            <button onClick={handleMinus} className={`w-5 h-5 flex items-center justify-center bg-white rounded shadow-sm ${textClass} border ${borderClass} font-bold text-xs`} disabled={isRunning || isDone || isPaused}>-</button>
-            <div className={`px-2 py-0.5 bg-white rounded-md text-[10px] font-bold ${textClass} border ${borderClass} w-12 text-center`}>
-              {isRunning || isPaused ? formatTime(timeLeft) : `${minutes} min`}
-            </div>
-            <button onClick={handlePlus} className={`w-5 h-5 flex items-center justify-center bg-white rounded shadow-sm ${textClass} border ${borderClass} font-bold text-xs`} disabled={isRunning || isDone || isPaused}>+</button>
-          </div>
-          {isDone ? (
-            <div className="w-8 h-8 bg-emerald-500 rounded-full flex items-center justify-center text-white shadow-sm border border-emerald-400">
-              <Check className="w-4 h-4" />
-            </div>
-          ) : isPaused ? (
-            <div className="flex gap-1">
-              <button onClick={() => setIsRunning(true)} className={`w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-sm z-10 relative group hover:opacity-80 transition-colors border ${borderClass} ${textClass}`}>
-                <Play className="w-3 h-3 ml-0.5 fill-current" />
-              </button>
-              <button onClick={handleReset} className={`w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-sm z-10 relative group hover:opacity-80 transition-colors border ${borderClass} ${textClass}`}>
-                <RotateCcw className="w-3 h-3 text-current" />
-              </button>
-            </div>
-          ) : (
-            <button onClick={() => setIsRunning(!isRunning)} className={`w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-sm z-10 relative group hover:opacity-80 transition-colors border ${borderClass} ${textClass}`}>
-              {isRunning ? <Pause className="w-3 h-3 fill-current" /> : <Play className="w-3 h-3 ml-0.5 fill-current" />}
-            </button>
-          )}
-        </div>
-        <h4 className={`font-bold text-sm ${textClass}`}>{title}</h4>
-      </div>
-    </div>
-  );
-};
 
 const CustomMoodTooltip = ({ active, payload }: any) => {
   if (active && payload && payload.length) {
@@ -228,24 +134,100 @@ export const PatientDashboard: React.FC = () => {
     }
   };
 
-  const [selectedPastDay, setSelectedPastDay] = useState<PastCheckIn | null>(null);
+  // Dynamic Shared Goals State (Synced across Patient and Counsellor)
+  const [sharedGoals, setSharedGoals] = useState<SharedGoal[]>(() => {
+    const saved = localStorage.getItem('sahay_shared_goals');
+    return saved ? JSON.parse(saved) : INITIAL_MOCK_GOALS;
+  });
+
+  const [goalsSubTab, setGoalsSubTab] = useState<'DOCTOR_ASSIGNED' | 'SELF_GOALS'>('DOCTOR_ASSIGNED');
+
+  // Dynamic Shared Meetings State (Synced across Patient and Counsellor)
+  const [sharedMeetings, setSharedMeetings] = useState<CounsellorMeeting[]>(() => {
+    const saved = localStorage.getItem('sahay_meetings');
+    return saved ? JSON.parse(saved) : INITIAL_MOCK_MEETINGS;
+  });
+
+  // Storage listener & auto-sync across tabs/roles
+  useEffect(() => {
+    const handleStorage = () => {
+      const savedGoals = localStorage.getItem('sahay_shared_goals');
+      if (savedGoals) setSharedGoals(JSON.parse(savedGoals));
+      const savedMeetings = localStorage.getItem('sahay_meetings');
+      if (savedMeetings) setSharedMeetings(JSON.parse(savedMeetings));
+    };
+    window.addEventListener('storage', handleStorage);
+    const interval = setInterval(handleStorage, 2000);
+    return () => {
+      window.removeEventListener('storage', handleStorage);
+      clearInterval(interval);
+    };
+  }, []);
+
+  const saveSharedGoals = (updated: SharedGoal[]) => {
+    setSharedGoals(updated);
+    localStorage.setItem('sahay_shared_goals', JSON.stringify(updated));
+  };
+
+  const saveSharedMeetings = (updated: CounsellorMeeting[]) => {
+    setSharedMeetings(updated);
+    localStorage.setItem('sahay_meetings', JSON.stringify(updated));
+  };
+
+  const getTodayCheckIn = (): PastCheckIn => {
+    const todayStr = new Date().toISOString().split('T')[0];
+    const phone = localStorage.getItem('sahay_patient_phone') || localStorage.getItem('sahay_active_user_phone');
+    if (phone) {
+      const histStr = localStorage.getItem(`sahay_history_${phone}`);
+      if (histStr) {
+        try {
+          const hist: PastCheckIn[] = JSON.parse(histStr);
+          const todayEntry = hist.find(h => h.date === todayStr);
+          if (todayEntry) return todayEntry;
+        } catch (e) {}
+      }
+    }
+
+    const savedLast = localStorage.getItem('sahay_last_mood');
+    const savedJournal = localStorage.getItem('sahay_last_journal');
+    const savedEnergy = localStorage.getItem('sahay_last_energy');
+    const savedStress = localStorage.getItem('sahay_last_stress');
+    const savedSleep = localStorage.getItem('sahay_last_sleep');
+    const hasVoice = localStorage.getItem('sahay_has_voice_note') === 'true';
+    
+    const moodNum = savedLast ? parseInt(savedLast) : 3;
+    const moodLabelsList: MoodType[] = ['Very Low', 'Low', 'Neutral', 'Good', 'Great'];
+    const category = moodLabelsList[moodNum] || 'Neutral';
+
+    return {
+      date: todayStr,
+      mood: category,
+      journal: savedJournal !== null ? savedJournal : (language === 'hi' ? 'दैनिक चेक-इन प्रविष्टि दर्ज की गई।' : 'Daily check-in logged.'),
+      energy: savedEnergy ? parseInt(savedEnergy) : 7,
+      stress: savedStress ? parseInt(savedStress) : 4,
+      sleep: savedSleep || '7h 30m',
+      hasVoiceNote: hasVoice
+    };
+  };
+
+  const [selectedPastDay, setSelectedPastDay] = useState<PastCheckIn | null>(getTodayCheckIn());
 
   // Daily Goals State
-  const [isReadingDone, setIsReadingDone] = useState(initialData?.isReadingDone || false);
-  const [isYogaDone, setIsYogaDone] = useState(initialData?.isYogaDone || false);
+  const [isReadingDone] = useState(initialData?.isReadingDone || false);
+  const [isYogaDone] = useState(initialData?.isYogaDone || false);
 
   // Appointments State
   const [appointments, setAppointments] = useState<{ upcoming: any[], past: any[] }>(initialData?.appointments || {
     upcoming: [
-      { id: 1, date: '2026-09-22', time: '10:00 AM', counsellor: 'Dr. Sarah Jenkins', type: 'Video Session' },
-      { id: 3, date: '2026-09-17', time: '11:00 AM', counsellor: 'Dr. Sarah Jenkins', type: 'Clinic Visit' }
+      { id: 1, date: '2026-09-22', time: '10:00 AM', counsellor: 'Dr. Rajesh Sharma', type: 'Video Session' },
+      { id: 3, date: '2026-09-17', time: '11:00 AM', counsellor: 'Dr. Rajesh Sharma', type: 'Clinic Visit' }
     ],
     past: [
-      { id: 2, date: '2026-09-15', time: '2:00 PM', counsellor: 'Dr. Sarah Jenkins', status: 'Completed' }
+      { id: 2, date: '2026-09-15', time: '2:00 PM', counsellor: 'Dr. Rajesh Sharma', status: 'Completed' }
     ]
   });
 
-  const [checklist, setChecklist] = useState(initialData?.checklist || [
+  const [checklist] = useState(initialData?.checklist || [
     { id: 1, text: 'Drink 2L Water', done: false },
     { id: 2, text: 'Take prescribed medication', done: false },
     { id: 3, text: '30 min walk', done: false },
@@ -266,11 +248,10 @@ export const PatientDashboard: React.FC = () => {
     } catch (error) {
       console.error("Storage limit exceeded, likely due to a large profile picture.", error);
       try {
-        // Fallback: save without profile picture to prevent data loss
         const fallbackData = { ...dataToSave, profilePic: null };
         localStorage.setItem(`sahay_data_${patientPhone}`, JSON.stringify(fallbackData));
         alert(language === 'hi' ? 'प्रोफ़ाइल फ़ोटो बहुत बड़ी है और सहेजी नहीं जा सकी।' : 'The selected image is too large and could not be saved.');
-        setProfilePic(null); // Reset state so we don't keep triggering this on every other change
+        setProfilePic(null);
       } catch (fallbackError) {
         console.error("Failed to save even without profilePic", fallbackError);
       }
@@ -283,29 +264,39 @@ export const PatientDashboard: React.FC = () => {
   const PRE_SET_SLOTS = ["09:00 AM", "10:00 AM", "11:30 AM", "02:00 PM", "04:00 PM"];
   const OCCUPIED_SLOTS = ["10:00 AM", "02:00 PM"];
 
+  // Patient Meeting Request Creation Flow
   const confirmNewAppointment = () => {
     if (!newAptDate || !newAptTime) return;
-    setAppointments(prev => ({
-      ...prev,
-      upcoming: [...prev.upcoming, {
-        id: Date.now(),
-        date: newAptDate,
-        time: newAptTime,
-        counsellor: 'Dr. Sarah Jenkins',
-        type: 'Video Session'
-      }]
-    }));
+
+    const newMeetingRequest: CounsellorMeeting = {
+      id: `MTG-${Date.now()}`,
+      caseId: "Case #4821",
+      patientAlias: "Victim H-104",
+      date: newAptDate,
+      time: newAptTime,
+      status: "pending",
+      type: "Video Consultation",
+      riskLevel: "RED",
+      notes: "Patient submitted session request.",
+      meetUrl: "https://meet.google.com/sah-aytm-mtg"
+    };
+
+    saveSharedMeetings([newMeetingRequest, ...sharedMeetings]);
     setShowScheduleNew(false);
     setNewAptDate('');
     setNewAptTime('');
+    alert(t.requestSentSuccess);
   };
 
-  const totalTasks = checklist.length;
-  const completedTasks = checklist.filter((item: any) => item.done).length;
+  // Calculate Goals Progress Dynamically from shared goals!
+  const patientCaseGoals = sharedGoals.filter(g => g.caseId === "Case #4821" || !g.caseId);
+  const totalTasks = patientCaseGoals.length || 1;
+  const completedTasks = patientCaseGoals.filter(g => g.completed).length;
   const dailyGoalPercent = Math.round((completedTasks / totalTasks) * 100);
 
-  const toggleChecklistItem = (id: number) => {
-    setChecklist((prev: any[]) => prev.map((item: any) => item.id === id ? { ...item, done: !item.done } : item));
+  const toggleSharedGoal = (goalId: string) => {
+    const updated = sharedGoals.map(g => g.id === goalId ? { ...g, completed: !g.completed } : g);
+    saveSharedGoals(updated);
   };
 
   const handleSidebarDayClick = (day: PastCheckIn | null) => {
@@ -313,15 +304,11 @@ export const PatientDashboard: React.FC = () => {
       setSelectedPastDay(day);
       setActiveTab('CALENDAR');
     } else {
-      setSelectedPastDay(null);
+      setSelectedPastDay(getTodayCheckIn());
     }
   };
 
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-
-  const computedUpcoming = appointments.upcoming.filter(apt => new Date(apt.date) >= today);
-  const computedMissed = appointments.upcoming.filter(apt => new Date(apt.date) < today);
+  const computedUpcoming = appointments.upcoming;
 
   return (
     <div className="min-h-screen bg-[#f0fdf4] text-slate-900 flex font-sans overflow-hidden">
@@ -701,27 +688,98 @@ export const PatientDashboard: React.FC = () => {
                 
                 <div className="bg-white/70 backdrop-blur-xl rounded-3xl p-6 sm:p-8 border border-white shadow-sm space-y-8">
                    
+                   {/* Pending Requests Section */}
+                   {sharedMeetings.filter(m => m.status === 'pending').length > 0 && (
+                     <div className="flex flex-col gap-4">
+                       <h3 className="font-bold text-amber-800 border-b border-amber-100 pb-2 flex items-center gap-2">
+                         <Clock className="w-4 h-4 text-amber-600" />
+                         {t.pendingRequests}
+                       </h3>
+                       {sharedMeetings.filter(m => m.status === 'pending').map(m => (
+                         <div key={m.id} className="p-5 rounded-2xl bg-amber-50/70 border border-amber-200/80 flex flex-col md:flex-row justify-between md:items-center gap-4 shadow-xs">
+                           <div className="flex gap-4 items-center">
+                             <div className="w-12 h-12 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center shrink-0">
+                               <Video className="w-5 h-5"/>
+                             </div>
+                             <div>
+                                <h4 className="font-bold text-slate-800">{m.type} with Dr. Rajesh Sharma</h4>
+                                <span className="inline-block text-[11px] font-bold text-amber-800 bg-amber-100 px-2.5 py-0.5 rounded-full border border-amber-200 mt-1">
+                                  ⏳ {t.statusPending}
+                                </span>
+                             </div>
+                           </div>
+                           <div className="flex flex-wrap items-center gap-4 text-sm font-semibold text-slate-600 shrink-0">
+                              <div className="flex items-center gap-1.5 bg-white px-3 py-1.5 rounded-lg border border-amber-100"><CalendarIcon className="w-4 h-4 text-amber-500" /> {m.date}</div>
+                              <div className="flex items-center gap-1.5 bg-white px-3 py-1.5 rounded-lg border border-amber-100"><Clock className="w-4 h-4 text-amber-500" /> {m.time}</div>
+                           </div>
+                         </div>
+                       ))}
+                     </div>
+                   )}
+
+                   {/* Declined Requests Section */}
+                   {sharedMeetings.filter(m => m.status === 'declined').length > 0 && (
+                     <div className="flex flex-col gap-4">
+                       <h3 className="font-bold text-rose-800 border-b border-rose-100 pb-2 flex items-center gap-2">
+                         <X className="w-4 h-4 text-rose-600" />
+                         {t.statusDeclined}
+                       </h3>
+                       {sharedMeetings.filter(m => m.status === 'declined').map(m => (
+                         <div key={m.id} className="p-5 rounded-2xl bg-rose-50/60 border border-rose-100 flex flex-col md:flex-row justify-between md:items-center gap-4">
+                           <div className="flex gap-4 items-center">
+                             <div className="w-12 h-12 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center shrink-0">
+                               <Video className="w-5 h-5"/>
+                             </div>
+                             <div>
+                                <h4 className="font-bold text-slate-800">{m.type} ({m.date} {m.time})</h4>
+                                <p className="text-xs font-semibold text-rose-700 mt-1">{t.counsellorBusyMsg}</p>
+                             </div>
+                           </div>
+                           <button 
+                             onClick={() => setShowScheduleNew(true)} 
+                             className="px-4 py-2 bg-rose-100 text-rose-700 font-bold rounded-xl hover:bg-rose-200 transition-colors text-xs shrink-0"
+                           >
+                             Try Another Slot
+                           </button>
+                         </div>
+                       ))}
+                     </div>
+                   )}
+
                    {/* Upcoming Section */}
                    <div className="flex flex-col gap-4">
-                     <h3 className="font-bold text-slate-800 border-b border-slate-100 pb-2">Upcoming Sessions</h3>
-                     {computedUpcoming.length === 0 ? (
+                     <h3 className="font-bold text-slate-800 border-b border-slate-100 pb-2">{t.upcomingBadge}</h3>
+                     {sharedMeetings.filter(m => m.status === 'upcoming' || m.status === 'accepted').length === 0 ? (
                         <p className="text-slate-500 text-sm py-4">No upcoming appointments.</p>
                      ) : (
-                       computedUpcoming.map(apt => (
+                       sharedMeetings.filter(m => m.status === 'upcoming' || m.status === 'accepted').map(apt => (
                          <div key={apt.id} className="p-5 rounded-2xl bg-white border border-slate-100 flex flex-col md:flex-row justify-between md:items-center gap-4 hover:shadow-md transition-shadow">
                            <div className="flex gap-4 items-center">
                              <div className="w-12 h-12 rounded-full bg-indigo-50 text-indigo-500 flex items-center justify-center shrink-0">
                                <Video className="w-5 h-5"/>
                              </div>
                              <div>
-                                <h4 className="font-bold text-slate-800">{apt.type} with {apt.counsellor}</h4>
-                                <p className="text-xs text-slate-500 mt-0.5">Manage in Counsellor Tab</p>
+                                <h4 className="font-bold text-slate-800">{apt.type} with Dr. Rajesh Sharma</h4>
+                                <span className="inline-block text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100 mt-0.5">
+                                  ✓ {t.statusAccepted}
+                                </span>
                              </div>
                            </div>
                            <div className="flex flex-wrap items-center gap-4 text-sm font-semibold text-slate-600 shrink-0">
                               <div className="flex items-center gap-1.5 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-100"><CalendarIcon className="w-4 h-4 text-slate-400" /> {apt.date}</div>
                               <div className="flex items-center gap-1.5 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-100"><Clock className="w-4 h-4 text-slate-400" /> {apt.time}</div>
-                              <button onClick={() => setActiveTab('COUNSELLOR')} className="px-4 py-2 bg-emerald-50 text-emerald-600 font-bold rounded-xl hover:bg-emerald-100 transition-colors border border-emerald-100">View</button>
+                              {apt.meetUrl && (
+                                <a
+                                  href={apt.meetUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl transition-colors shadow-xs text-xs flex items-center gap-1.5"
+                                >
+                                  <Video className="w-4 h-4" />
+                                  {t.joinMeeting}
+                                </a>
+                              )}
+                              <button onClick={() => setActiveTab('COUNSELLOR')} className="px-4 py-2 bg-emerald-50 text-emerald-600 font-bold rounded-xl hover:bg-emerald-100 transition-colors border border-emerald-100 text-xs">{t.viewProfileBtn}</button>
                            </div>
                          </div>
                        ))
@@ -730,25 +788,25 @@ export const PatientDashboard: React.FC = () => {
 
                    {/* Missed Section */}
                    <div className="flex flex-col gap-4">
-                     <h3 className="font-bold text-slate-800 border-b border-slate-100 pb-2">Missed Sessions</h3>
-                     {computedMissed.length === 0 ? (
+                     <h3 className="font-bold text-slate-800 border-b border-slate-100 pb-2">{t.tabMissed}</h3>
+                     {sharedMeetings.filter(m => m.status === 'missed').length === 0 ? (
                         <p className="text-slate-500 text-sm py-4">No missed appointments.</p>
                      ) : (
-                       computedMissed.map(apt => (
+                       sharedMeetings.filter(m => m.status === 'missed').map(apt => (
                          <div key={apt.id} className="p-5 rounded-2xl bg-rose-50/50 border border-rose-100 flex flex-col md:flex-row justify-between md:items-center gap-4 opacity-80">
                            <div className="flex gap-4 items-center">
                              <div className="w-12 h-12 rounded-full bg-rose-100 text-rose-500 flex items-center justify-center shrink-0">
                                <Video className="w-5 h-5"/>
                              </div>
                              <div>
-                                <h4 className="font-bold text-slate-800">{apt.type} with {apt.counsellor}</h4>
-                                <p className="text-xs text-rose-500 mt-0.5 font-bold">Missed</p>
+                                <h4 className="font-bold text-slate-800">{apt.type} with Dr. Rajesh Sharma</h4>
+                                <p className="text-xs text-rose-500 mt-0.5 font-bold">{t.tabMissed}</p>
                              </div>
                            </div>
                            <div className="flex flex-wrap items-center gap-4 text-sm font-semibold text-slate-600 shrink-0">
                               <div className="flex items-center gap-1.5 bg-white px-3 py-1.5 rounded-lg border border-rose-100"><CalendarIcon className="w-4 h-4 text-rose-400" /> {apt.date}</div>
                               <div className="flex items-center gap-1.5 bg-white px-3 py-1.5 rounded-lg border border-rose-100"><Clock className="w-4 h-4 text-rose-400" /> {apt.time}</div>
-                              <button onClick={() => setActiveTab('COUNSELLOR')} className="px-4 py-2 bg-rose-100 text-rose-700 font-bold rounded-xl hover:bg-rose-200 transition-colors border border-rose-200">Reschedule</button>
+                              <button onClick={() => setShowScheduleNew(true)} className="px-4 py-2 bg-rose-100 text-rose-700 font-bold rounded-xl hover:bg-rose-200 transition-colors border border-rose-200 text-xs">{t.rescheduleBtn}</button>
                            </div>
                          </div>
                        ))
@@ -761,44 +819,45 @@ export const PatientDashboard: React.FC = () => {
 
             {/* YOGA TAB */}
             {activeTab === 'YOGA' && (
-              <div className="space-y-6">
-                <div>
-                  <h2 className="text-2xl font-bold text-slate-800">{t.dashNavYoga}</h2>
-                  <p className="text-slate-500 text-sm">Practice mindfulness, breathing, and guided meditation.</p>
-                </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <TimerCard 
-                    title={t.dashReadingTitle}
-                    initialMinutes={7} 
-                    bgClass="bg-white/80 backdrop-blur-sm"
-                    borderClass="border-slate-200"
-                    textClass="text-slate-800"
-                    onComplete={() => setIsReadingDone(true)}
-                  />
-
-                  <TimerCard 
-                    title={t.dashYogaTitle}
-                    initialMinutes={5} 
-                    bgClass="bg-white/80 backdrop-blur-sm"
-                    borderClass="border-rose-100"
-                    textClass="text-rose-900"
-                    onComplete={() => setIsYogaDone(true)}
-                  />
-                </div>
-              </div>
+              <YogaSection />
             )}
 
             {/* GOALS TAB */}
             {activeTab === 'GOALS' && (
               <div className="space-y-6">
-                <div>
-                  <h2 className="text-2xl font-bold text-slate-800">{t.dashDailyGoals}</h2>
-                  <p className="text-slate-500 text-sm">{t.dashGoalsSub}</p>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div>
+                    <h2 className="text-2xl font-bold text-slate-800">{t.dashDailyGoals}</h2>
+                    <p className="text-slate-500 text-sm">{t.dashGoalsSub}</p>
+                  </div>
+
+                  {/* Internal Goals Tab Switcher */}
+                  <div className="flex bg-white/80 p-1.5 rounded-2xl border border-slate-200 shadow-sm shrink-0">
+                    <button
+                      onClick={() => setGoalsSubTab('DOCTOR_ASSIGNED')}
+                      className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+                        goalsSubTab === 'DOCTOR_ASSIGNED'
+                          ? 'bg-indigo-600 text-white shadow-xs'
+                          : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+                      }`}
+                    >
+                      {t.doctorAssignedGoals}
+                    </button>
+                    <button
+                      onClick={() => setGoalsSubTab('SELF_GOALS')}
+                      className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+                        goalsSubTab === 'SELF_GOALS'
+                          ? 'bg-emerald-600 text-white shadow-xs'
+                          : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+                      }`}
+                    >
+                      {t.selfGoals}
+                    </button>
+                  </div>
                 </div>
                 
-                <div className="bg-emerald-50/80 backdrop-blur-xl rounded-3xl p-6 sm:p-8 border border-emerald-100 shadow-sm space-y-8">
-                  <div className="flex flex-col md:flex-row items-center gap-8">
+                <div className="bg-white/70 backdrop-blur-xl rounded-3xl p-6 sm:p-8 border border-white shadow-sm space-y-8">
+                  <div className="flex flex-col md:flex-row items-center gap-8 bg-emerald-50/60 p-6 rounded-2xl border border-emerald-100">
                     <div 
                       className="w-24 h-24 rounded-full flex items-center justify-center shadow-sm relative shrink-0"
                       style={{ background: `conic-gradient(#34d399 ${dailyGoalPercent}%, #e2e8f0 ${dailyGoalPercent}%)` }}
@@ -809,40 +868,122 @@ export const PatientDashboard: React.FC = () => {
                     </div>
                     <div className="text-center md:text-left">
                       <h3 className="font-bold text-emerald-950 text-xl">{t.dashGoalsGreat}</h3>
-                      <p className="text-emerald-700 font-medium mt-1">{completedTasks} {t.dashOutOf} {totalTasks} {t.dashTasksCompleted}</p>
+                      <p className="text-emerald-700 font-medium mt-1">
+                        {completedTasks} {t.dashOutOf} {totalTasks} {t.dashTasksCompleted}
+                      </p>
                     </div>
                   </div>
                   
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between mb-4">
-                      <h4 className="font-bold text-slate-800 text-sm">{t.dashChecklistTitle}</h4>
-                      <button onClick={() => {
-                        const newGoal = window.prompt('Enter new goal:');
-                        if (newGoal && newGoal.trim()) {
-                          setChecklist((prev: any[]) => [...prev, { id: Date.now(), text: newGoal.trim(), done: false }]);
-                        }
-                      }} className="w-6 h-6 flex items-center justify-center rounded-full bg-emerald-100 text-emerald-700 hover:bg-emerald-200 transition-colors shadow-sm text-lg leading-none pb-0.5">
-                        +
-                      </button>
-                    </div>
-                    {checklist.map((item: any) => {
-                      // Translate mock checklist items dynamically
-                      let itemText = item.text;
-                      if (itemText === 'Drink 2L Water') itemText = t.goalWater;
-                      else if (itemText === 'Take prescribed medication') itemText = t.goalMeds;
-                      else if (itemText === '30 min walk') itemText = t.goalWalk;
-                      else if (itemText === 'Write in journal') itemText = t.goalJournal;
-                      
-                      return (
-                      <div key={item.id} onClick={() => toggleChecklistItem(item.id)} className="flex items-center gap-4 cursor-pointer bg-white p-4 rounded-2xl hover:shadow-md transition-all border border-emerald-100/60 group">
-                        <div className={`w-6 h-6 shrink-0 rounded-md flex items-center justify-center border transition-colors ${item.done ? 'bg-emerald-500 border-emerald-500 text-white shadow-sm' : 'border-emerald-200 bg-emerald-50 group-hover:bg-emerald-100'}`}>
-                          {item.done && <Check className="w-4 h-4" />}
-                        </div>
-                        <span className={`text-base transition-all ${item.done ? 'text-emerald-700 line-through opacity-70' : 'text-emerald-950 font-medium'}`}>{itemText}</span>
-                      </div>
-                    )})}
-                  </div>
+                  {goalsSubTab === 'DOCTOR_ASSIGNED' && (
+                    <div className="space-y-4">
+                      <h4 className="font-bold text-slate-800 text-sm flex items-center gap-2">
+                        <User className="w-4 h-4 text-indigo-500" />
+                        {t.doctorAssignedGoals}
+                      </h4>
 
+                      {patientCaseGoals.filter(g => g.assignedBy === 'counsellor').length === 0 ? (
+                        <p className="text-slate-500 text-sm py-4 italic">No goals assigned by your counsellor yet.</p>
+                      ) : (
+                        patientCaseGoals.filter(g => g.assignedBy === 'counsellor').map(goal => (
+                          <div
+                            key={goal.id}
+                            onClick={() => toggleSharedGoal(goal.id)}
+                            className="flex items-start gap-4 cursor-pointer bg-white p-5 rounded-2xl hover:shadow-md transition-all border border-indigo-100/80 group"
+                          >
+                            <div className={`mt-0.5 w-6 h-6 shrink-0 rounded-lg flex items-center justify-center border transition-colors ${
+                              goal.completed ? 'bg-indigo-600 border-indigo-600 text-white shadow-sm' : 'border-indigo-200 bg-indigo-50 group-hover:bg-indigo-100'
+                            }`}>
+                              {goal.completed && <Check className="w-4 h-4" />}
+                            </div>
+                            <div className="flex-1">
+                              <div className="flex items-center justify-between">
+                                <h5 className={`font-bold text-base transition-all ${
+                                  goal.completed ? 'text-slate-400 line-through' : 'text-slate-900'
+                                }`}>
+                                  {goal.title}
+                                </h5>
+                                <span className="text-[10px] font-bold text-indigo-700 bg-indigo-50 px-2.5 py-1 rounded-full border border-indigo-100">
+                                  {t.assignedByLabel}: Dr. Rajesh Sharma
+                                </span>
+                              </div>
+                              <p className="text-xs text-slate-500 mt-1">{goal.description}</p>
+                              {goal.dueDate && (
+                                <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-amber-600 mt-2 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-100">
+                                  <Clock className="w-3 h-3" /> {t.dueDateLabel}: {goal.dueDate}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  )}
+
+                  {goalsSubTab === 'SELF_GOALS' && (
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between mb-4">
+                        <h4 className="font-bold text-slate-800 text-sm">{t.selfGoals}</h4>
+                        <button
+                          onClick={() => {
+                            const title = window.prompt('Enter Goal Title:');
+                            if (!title || !title.trim()) return;
+                            const desc = window.prompt('Enter Goal Description (Optional):') || '';
+                            const newGoal: SharedGoal = {
+                              id: `goal-${Date.now()}`,
+                              caseId: "Case #4821",
+                              title: title.trim(),
+                              description: desc.trim(),
+                              assignedBy: "patient",
+                              dueDate: "Daily",
+                              completed: false,
+                              createdAt: new Date().toISOString().split('T')[0]
+                            };
+                            saveSharedGoals([...sharedGoals, newGoal]);
+                          }}
+                          className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl transition-colors shadow-xs text-xs flex items-center gap-1"
+                        >
+                          + {t.addGoalBtn}
+                        </button>
+                      </div>
+
+                      {patientCaseGoals.filter(g => g.assignedBy === 'patient').length === 0 ? (
+                        <p className="text-slate-500 text-sm py-4 italic">No self goals added yet. Click "+ Add Goal" above to create one!</p>
+                      ) : (
+                        patientCaseGoals.filter(g => g.assignedBy === 'patient').map(goal => (
+                          <div
+                            key={goal.id}
+                            onClick={() => toggleSharedGoal(goal.id)}
+                            className="flex items-start gap-4 cursor-pointer bg-white p-5 rounded-2xl hover:shadow-md transition-all border border-emerald-100 group"
+                          >
+                            <div className={`mt-0.5 w-6 h-6 shrink-0 rounded-lg flex items-center justify-center border transition-colors ${
+                              goal.completed ? 'bg-emerald-500 border-emerald-500 text-white shadow-sm' : 'border-emerald-200 bg-emerald-50 group-hover:bg-emerald-100'
+                            }`}>
+                              {goal.completed && <Check className="w-4 h-4" />}
+                            </div>
+                            <div className="flex-1">
+                              <div className="flex items-center justify-between">
+                                <h5 className={`font-bold text-base transition-all ${
+                                  goal.completed ? 'text-emerald-700 line-through opacity-70' : 'text-emerald-950 font-medium'
+                                }`}>
+                                  {goal.title}
+                                </h5>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    saveSharedGoals(sharedGoals.filter(g => g.id !== goal.id));
+                                  }}
+                                  className="text-slate-400 hover:text-rose-500 text-xs p-1"
+                                >
+                                  <X className="w-4 h-4" />
+                                </button>
+                              </div>
+                              {goal.description && <p className="text-xs text-slate-500 mt-1">{goal.description}</p>}
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  )}
 
                 </div>
               </div>
@@ -890,7 +1031,7 @@ export const PatientDashboard: React.FC = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="bg-slate-50 p-5 rounded-2xl border border-slate-100">
                       <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Assigned Counsellor</h4>
-                      <p className="font-bold text-slate-800 text-lg">Dr. Sarah Jenkins</p>
+                      <p className="font-bold text-slate-800 text-lg">Dr. Rajesh Sharma</p>
                       <p className="text-xs text-emerald-600 font-semibold mt-1">Clinical Psychologist</p>
                     </div>
                     
@@ -993,7 +1134,7 @@ export const PatientDashboard: React.FC = () => {
         <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl p-6 max-w-sm w-full shadow-xl">
             <h3 className="font-bold text-lg mb-2">Schedule Appointment</h3>
-            <p className="text-sm text-slate-500 mb-4">Book a new session with Dr. Sarah Jenkins.</p>
+            <p className="text-sm text-slate-500 mb-4">Book a new session with Dr. Rajesh Sharma.</p>
             
             <label className="text-xs font-bold text-slate-500 mb-1 block">Date</label>
             <input type="date" value={newAptDate} onChange={e => setNewAptDate(e.target.value)} className="w-full border border-slate-200 p-2 rounded-xl mb-4 text-sm" />

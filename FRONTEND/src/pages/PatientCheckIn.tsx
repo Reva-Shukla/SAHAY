@@ -28,9 +28,15 @@ export const PatientCheckIn: React.FC = () => {
   const [otp, setOtp] = useState('');
   const [authError, setAuthError] = useState('');
 
-  // Checkin states (left mostly as they were if needed later, but we skip directly to dashboard mostly)
+  // Checkin states
   const [selectedMood, setSelectedMood] = useState<MoodType | null>(null);
   const [journalText, setJournalText] = useState('');
+  const [energyLevel, setEnergyLevel] = useState<number>(7);
+  const [stressLevel, setStressLevel] = useState<number>(4);
+  const [sleepHours, setSleepHours] = useState<number>(7);
+  const [sleepMinutes, setSleepMinutes] = useState<number>(30);
+  const [hasRecordedVoice, setHasRecordedVoice] = useState<boolean>(false);
+  const [voiceTranscript, setVoiceTranscript] = useState<string>('');
   
   const [isSubmitting] = useState(false);
 
@@ -136,7 +142,7 @@ export const PatientCheckIn: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#e6f7f4] via-[#fefae0] to-[#e8f0fe] text-slate-900 flex flex-col justify-between relative overflow-hidden">
+    <div className="min-h-screen bg-cover bg-center bg-no-repeat text-slate-900 flex flex-col justify-between relative overflow-hidden" style={{ backgroundImage: 'url(/landing-bg.jpg)' }}>
       
       {/* Soft Ambient Blobs */}
       <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-emerald-200/30 rounded-full blur-[100px] pointer-events-none"></div>
@@ -295,35 +301,140 @@ export const PatientCheckIn: React.FC = () => {
                <form onSubmit={async (e) => { 
                  e.preventDefault(); 
                  if (!selectedMood) return;
+                 
+                 const sleepStr = `${sleepHours}h ${sleepMinutes < 10 ? '0' : ''}${sleepMinutes}m`;
+                 const moodList: MoodType[] = ['Very Low', 'Low', 'Neutral', 'Good', 'Great'];
+                 const moodIndex = moodList.indexOf(selectedMood);
+
                  const newCheckIn = {
                    date: new Date().toISOString().split('T')[0],
                    mood: selectedMood,
-                   journal: journalText,
-                   energy: 6,
-                   stress: 5,
-                   sleep: '7h 00m'
+                   journal: journalText.trim(),
+                   energy: energyLevel,
+                   stress: stressLevel,
+                   sleep: sleepStr,
+                   hasVoiceNote: hasRecordedVoice,
+                   voiceTranscript: voiceTranscript
                  };
-                 const phone = localStorage.getItem('sahay_active_user_phone');
+
+                 const phone = localStorage.getItem('sahay_patient_phone') || localStorage.getItem('sahay_active_user_phone');
                  if (phone) {
                    const histStr = localStorage.getItem(`sahay_history_${phone}`);
                    const hist = histStr ? JSON.parse(histStr) : [];
-                   hist.push(newCheckIn);
-                   localStorage.setItem(`sahay_history_${phone}`, JSON.stringify(hist));
+                   const filtered = hist.filter((h: any) => h.date !== newCheckIn.date);
+                   filtered.push(newCheckIn);
+                   localStorage.setItem(`sahay_history_${phone}`, JSON.stringify(filtered));
                  }
+
+                 localStorage.setItem('sahay_last_mood', String(moodIndex >= 0 ? moodIndex : 3));
+                 localStorage.setItem('sahay_last_journal', journalText.trim());
+                 localStorage.setItem('sahay_last_energy', String(energyLevel));
+                 localStorage.setItem('sahay_last_stress', String(stressLevel));
+                 localStorage.setItem('sahay_last_sleep', sleepStr);
+                 localStorage.setItem('sahay_has_voice_note', String(hasRecordedVoice));
+
                  navigate('/patient/dashboard'); 
                }} className="p-6 sm:p-8 rounded-3xl bg-white border border-slate-100 shadow-xl shadow-slate-200/40 space-y-8">
+                 
+                 {/* Mood Selection */}
                  <div>
                    <label className="block text-sm font-bold text-slate-800 mb-4">{language === 'hi' ? 'आज आप कैसा महसूस कर रहे हैं?' : 'How are you feeling today?'}</label>
                    <MoodSelector selectedMood={selectedMood} onSelectMood={setSelectedMood} />
                  </div>
-                 <div className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-bold text-slate-800 mb-2">{language === 'hi' ? 'जर्नल' : 'Journal'}</label>
-                      <p className="text-xs text-slate-500 mb-3">{language === 'hi' ? 'कुछ और शेयर करना चाहते हैं?' : 'Anything else you want to share?'}</p>
-                      <textarea value={journalText} onChange={(e) => setJournalText(e.target.value)} rows={3} className="w-full p-4 rounded-2xl bg-slate-50 border border-slate-200 text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500" placeholder={language === 'hi' ? 'यहां लिखें...' : 'Write here...'} />
-                    </div>
-                    <VoiceRecorder onRecordingComplete={() => {}} />
+
+                 {/* Energy & Stress 1-10 Ratings */}
+                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-slate-100">
+                   <div>
+                     <div className="flex justify-between items-center mb-2">
+                       <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
+                         {language === 'hi' ? 'ऊर्जा का स्तर (1-10)' : 'Energy Level (1-10)'}
+                       </label>
+                       <span className="text-xs font-bold px-2 py-0.5 bg-amber-100 text-amber-800 rounded-md">{energyLevel}/10</span>
+                     </div>
+                     <div className="flex items-center gap-1">
+                       {Array.from({ length: 10 }).map((_, i) => (
+                         <button
+                           key={i}
+                           type="button"
+                           onClick={() => setEnergyLevel(i + 1)}
+                           className={`flex-1 h-8 rounded-lg text-xs font-bold transition-all ${
+                             i < energyLevel ? 'bg-amber-400 text-amber-950 shadow-xs scale-105' : 'bg-slate-100 text-slate-400 hover:bg-slate-200'
+                           }`}
+                         >
+                           {i + 1}
+                         </button>
+                       ))}
+                     </div>
+                   </div>
+
+                   <div>
+                     <div className="flex justify-between items-center mb-2">
+                       <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
+                         {language === 'hi' ? 'तनाव का स्तर (1-10)' : 'Stress Level (1-10)'}
+                       </label>
+                       <span className="text-xs font-bold px-2 py-0.5 bg-rose-100 text-rose-800 rounded-md">{stressLevel}/10</span>
+                     </div>
+                     <div className="flex items-center gap-1">
+                       {Array.from({ length: 10 }).map((_, i) => (
+                         <button
+                           key={i}
+                           type="button"
+                           onClick={() => setStressLevel(i + 1)}
+                           className={`flex-1 h-8 rounded-lg text-xs font-bold transition-all ${
+                             i < stressLevel ? 'bg-rose-400 text-rose-950 shadow-xs scale-105' : 'bg-slate-100 text-slate-400 hover:bg-slate-200'
+                           }`}
+                         >
+                           {i + 1}
+                         </button>
+                       ))}
+                     </div>
+                   </div>
                  </div>
+
+                 {/* Sleep Duration Input */}
+                 <div className="pt-4 border-t border-slate-100">
+                   <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">
+                     {language === 'hi' ? 'नींद की अवधि (घंटे / मिनट)' : 'Sleep Duration (Hours / Minutes)'}
+                   </label>
+                   <div className="flex items-center gap-4">
+                     <div className="flex-1 flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-2xl p-2 px-4">
+                       <input
+                         type="number"
+                         min="0"
+                         max="24"
+                         value={sleepHours}
+                         onChange={(e) => setSleepHours(Math.max(0, Math.min(24, parseInt(e.target.value) || 0)))}
+                         className="w-12 bg-transparent font-bold text-center text-slate-800 focus:outline-none"
+                       />
+                       <span className="text-xs font-bold text-slate-400">{language === 'hi' ? 'घंटे' : 'hrs'}</span>
+                     </div>
+                     <div className="flex-1 flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-2xl p-2 px-4">
+                       <input
+                         type="number"
+                         min="0"
+                         max="59"
+                         value={sleepMinutes}
+                         onChange={(e) => setSleepMinutes(Math.max(0, Math.min(59, parseInt(e.target.value) || 0)))}
+                         className="w-12 bg-transparent font-bold text-center text-slate-800 focus:outline-none"
+                       />
+                       <span className="text-xs font-bold text-slate-400">{language === 'hi' ? 'मिनट' : 'mins'}</span>
+                     </div>
+                   </div>
+                 </div>
+
+                 {/* Journal & Voice Note */}
+                 <div className="space-y-4 pt-4 border-t border-slate-100">
+                   <div>
+                     <label className="block text-sm font-bold text-slate-800 mb-2">{language === 'hi' ? 'जर्नल' : 'Journal'}</label>
+                     <p className="text-xs text-slate-500 mb-3">{language === 'hi' ? 'कुछ और शेयर करना चाहते हैं?' : 'Anything else you want to share?'}</p>
+                     <textarea value={journalText} onChange={(e) => setJournalText(e.target.value)} rows={3} className="w-full p-4 rounded-2xl bg-slate-50 border border-slate-200 text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500" placeholder={language === 'hi' ? 'यहां लिखें...' : 'Write here...'} />
+                   </div>
+                   <VoiceRecorder onRecordingComplete={(hasRec, _, transcript) => {
+                     setHasRecordedVoice(hasRec);
+                     setVoiceTranscript(transcript || '');
+                   }} />
+                 </div>
+
                  <button type="submit" disabled={!selectedMood || isSubmitting} className="w-full flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-bold py-4 px-6 rounded-2xl transition-all shadow-sm">
                    {isSubmitting ? '...' : (language === 'hi' ? 'चेक-इन करें' : 'Check In')} <ArrowRight className="w-5 h-5" />
                  </button>

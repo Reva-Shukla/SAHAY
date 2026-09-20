@@ -184,6 +184,70 @@ interface Translations {
   rec2Title: string;
   rec2Desc: string;
   rec2Date: string;
+  // Counsellor UI & Priority Badges
+  priorityHigh: string;
+  priorityMedium: string;
+  priorityLow: string;
+  navCases: string;
+  navChat: string;
+  navMeetings: string;
+  navReports: string;
+  navProfile: string;
+  statusOnline: string;
+  tabUpcoming: string;
+  tabMissed: string;
+  repeatMissFlag: string;
+  noMeetingsFound: string;
+  scheduledMeetingsTitle: string;
+  sharedReportsTitle: string;
+  noMeetingsScheduled: string;
+  noReportsShared: string;
+  editProfileBtn: string;
+  saveProfileBtn: string;
+  cancelEditBtn: string;
+  changePhotoBtn: string;
+  photoSizeError: string;
+  profileUpdatedSuccess: string;
+  qualificationsLabel: string;
+  specializationsLabel: string;
+  bioLabel: string;
+  joinMeeting: string;
+  openPatientChat: string;
+  followUpChat: string;
+  viewTrajectory: string;
+  // New Connected Feature Translations
+  tabYogaCategory: string;
+  tabMeditationCategory: string;
+  startTimer: string;
+  pauseTimer: string;
+  resumeTimer: string;
+  resetTimer: string;
+  practiceCompleted: string;
+  benefitLabel: string;
+  durationLabel: string;
+  pendingRequests: string;
+  acceptBtn: string;
+  declineBtn: string;
+  statusPending: string;
+  statusAccepted: string;
+  statusDeclined: string;
+  counsellorBusyMsg: string;
+  requestSentSuccess: string;
+  doctorAssignedGoals: string;
+  selfGoals: string;
+  addGoalBtn: string;
+  assignGoalBtn: string;
+  assignedByLabel: string;
+  goalTitleLabel: string;
+  goalDescLabel: string;
+  dueDateLabel: string;
+  inProgressLabel: string;
+  completedLabel: string;
+  emailRequiredErr: string;
+  phoneRequiredErr: string;
+  reportSubmittedSuccess: string;
+  emailLabel: string;
+  phoneLabelRequired: string;
 }
 
 const TRANSLATIONS: Record<SupportedLanguage, Translations> = {
@@ -202,7 +266,7 @@ const TRANSLATIONS: Record<SupportedLanguage, Translations> = {
     dailyCheckIn: "SAHAY Daily Check-in",
     journalLabel: "How has your day been so far? (Optional)",
     journalPlaceholder: "Write a few lines about your thoughts, feelings, or struggles...",
-    voiceLabel: "Voice Note Check-in (Optional)",
+    voiceLabel: "Voice Note Check-in",
     tapToRecord: "Tap to Record Voice Note",
     recordingText: "Recording",
     recordingDone: "Voice Note Recorded",
@@ -358,14 +422,78 @@ const TRANSLATIONS: Record<SupportedLanguage, Translations> = {
     yesCancelBtn: "Yes, Cancel",
     confirmBtn: "Confirm",
     shareLogsTitle: "Share Logs",
-    shareLogsSub: "Select which recent entries you want to securely share with Dr. Sarah Jenkins.",
+    shareLogsSub: "Select which recent entries you want to securely share with Dr. Rajesh Sharma.",
     shareSelectedBtn: "Share Selected",
     rec1Title: "10-minute breathing exercise",
     rec1Desc: "Focus on deep abdominal breathing",
     rec1Date: "Complete before Sept 20",
     rec2Title: "Write 3 things you are grateful for",
     rec2Desc: "Gratitude journaling",
-    rec2Date: "Complete today"
+    rec2Date: "Complete today",
+    // Counsellor UI & Priority Badges
+    priorityHigh: "High",
+    priorityMedium: "Medium",
+    priorityLow: "Low",
+    navCases: "Dashboard/Cases",
+    navChat: "Chat",
+    navMeetings: "Meetings",
+    navReports: "Shared Reports",
+    navProfile: "Profile",
+    statusOnline: "Online",
+    tabUpcoming: "Upcoming",
+    tabMissed: "Missed",
+    repeatMissFlag: "Repeat Miss",
+    noMeetingsFound: "No meetings found",
+    scheduledMeetingsTitle: "Scheduled Meetings",
+    sharedReportsTitle: "Shared Reports",
+    noMeetingsScheduled: "No scheduled meetings for this patient",
+    noReportsShared: "No shared reports for this patient",
+    editProfileBtn: "Edit Profile",
+    saveProfileBtn: "Save Profile",
+    cancelEditBtn: "Cancel",
+    changePhotoBtn: "Change Photo",
+    photoSizeError: "Image size must be under 2 MB and a valid image format.",
+    profileUpdatedSuccess: "Profile updated successfully.",
+    qualificationsLabel: "Qualifications",
+    specializationsLabel: "Specializations",
+    bioLabel: "Professional Bio",
+    joinMeeting: "Join Meeting",
+    openPatientChat: "Open Patient Chat",
+    followUpChat: "Follow Up via Chat",
+    viewTrajectory: "View Case Trajectory",
+    // New Connected Feature Translations
+    tabYogaCategory: "Yoga Poses",
+    tabMeditationCategory: "Meditation & Breathing",
+    startTimer: "Start Session",
+    pauseTimer: "Pause",
+    resumeTimer: "Resume",
+    resetTimer: "Reset",
+    practiceCompleted: "Session Completed! Great job!",
+    benefitLabel: "Useful for / Benefits",
+    durationLabel: "Recommended Duration",
+    pendingRequests: "Pending Requests",
+    acceptBtn: "Accept",
+    declineBtn: "Decline",
+    statusPending: "Pending Approval",
+    statusAccepted: "Accepted",
+    statusDeclined: "Declined",
+    counsellorBusyMsg: "Counsellor is currently busy/unavailable and could not accept the request.",
+    requestSentSuccess: "Meeting request sent to your counsellor!",
+    doctorAssignedGoals: "Doctor Assigned Goals",
+    selfGoals: "Self Goals",
+    addGoalBtn: "Add Goal",
+    assignGoalBtn: "Assign Goal to Patient",
+    assignedByLabel: "Assigned by",
+    goalTitleLabel: "Goal Title",
+    goalDescLabel: "Goal Description",
+    dueDateLabel: "Due Date",
+    inProgressLabel: "In Progress",
+    completedLabel: "Completed",
+    emailRequiredErr: "Please enter a valid email address.",
+    phoneRequiredErr: "Please enter a valid 10-digit phone number.",
+    reportSubmittedSuccess: "Report submitted successfully! Our support team will contact you.",
+    emailLabel: "Email",
+    phoneLabelRequired: "Phone Number"
   },
   hi: {
     portalTitle: "सहाय — सुरक्षित एवं गोपनीय सहायता पोर्टल",
@@ -382,7 +510,7 @@ const TRANSLATIONS: Record<SupportedLanguage, Translations> = {
     dailyCheckIn: "सहाय दैनिक चेक-इन",
     journalLabel: "आज आपका दिन कैसा रहा? (वैकल्पिक)",
     journalPlaceholder: "अपने विचारों, भावनाओं या कठिनाइयों के बारे में कुछ पंक्तियाँ लिखें...",
-    voiceLabel: "वॉइस नोट चेक-इन (वैकल्पिक)",
+    voiceLabel: "वॉइस नोट चेक-इन",
     tapToRecord: "वॉइस नोट रिकॉर्ड करने के लिए टैप करें",
     recordingText: "रिकॉर्डिंग चालू है",
     recordingDone: "वॉइस नोट रिकॉर्ड हो गया",
@@ -538,14 +666,78 @@ const TRANSLATIONS: Record<SupportedLanguage, Translations> = {
     yesCancelBtn: "हां, रद्द करें",
     confirmBtn: "पुष्टि करें",
     shareLogsTitle: "लॉग साझा करें",
-    shareLogsSub: "चुनें कि आप कौन सी हालिया प्रविष्टियां डॉ. सारा जेनकिंस के साथ सुरक्षित रूप से साझा करना चाहते हैं।",
+    shareLogsSub: "चुनें कि आप कौन सी हालिया प्रविष्टियां डॉ. राजेश शर्मा के साथ सुरक्षित रूप से साझा करना चाहते हैं।",
     shareSelectedBtn: "चयनित साझा करें",
     rec1Title: "10 मिनट की श्वास व्यायाम",
     rec1Desc: "गहरी पेट की श्वास पर ध्यान दें",
     rec1Date: "20 सितंबर से पहले पूरा करें",
     rec2Title: "3 चीजें लिखें जिनके लिए आप आभारी हैं",
     rec2Desc: "कृतज्ञता जर्नलिंग",
-    rec2Date: "आज पूरा करें"
+    rec2Date: "आज पूरा करें",
+    // Counsellor UI & Priority Badges
+    priorityHigh: "उच्च",
+    priorityMedium: "मध्यम",
+    priorityLow: "निम्न",
+    navCases: "डैशबोर्ड/मामले",
+    navChat: "चैट",
+    navMeetings: "बैठकें",
+    navReports: "साझा रिपोर्ट",
+    navProfile: "प्रोफ़ाइल",
+    statusOnline: "ऑनलाइन",
+    tabUpcoming: "आगामी",
+    tabMissed: "छूटी हुई",
+    repeatMissFlag: "पुनरावृत्ति अनुपस्थिति",
+    noMeetingsFound: "कोई बैठक नहीं मिली",
+    scheduledMeetingsTitle: "निर्धारित बैठकें",
+    sharedReportsTitle: "साझा की गई रिपोर्ट",
+    noMeetingsScheduled: "इस मरीज के लिए कोई निर्धारित बैठक नहीं है",
+    noReportsShared: "इस मरीज के लिए कोई साझा रिपोर्ट नहीं है",
+    editProfileBtn: "प्रोफ़ाइल संपादित करें",
+    saveProfileBtn: "प्रोफ़ाइल सहेजें",
+    cancelEditBtn: "रद्द करें",
+    changePhotoBtn: "फ़ोटो बदलें",
+    photoSizeError: "छवि का आकार 2 MB से कम और मान्य प्रारूप होना चाहिए।",
+    profileUpdatedSuccess: "प्रोफ़ाइल सफलतापूर्वक अपडेट की गई।",
+    qualificationsLabel: "योग्यताएं",
+    specializationsLabel: "विशेषज्ञता",
+    bioLabel: "पेशेवर विवरण",
+    joinMeeting: "मीटिंग में शामिल हों",
+    openPatientChat: "रोगी चैट खोलें",
+    followUpChat: "चैट द्वारा अनुवर्ती कार्यवाही",
+    viewTrajectory: "केस प्रक्षेपवक्र देखें",
+    // New Connected Feature Translations
+    tabYogaCategory: "योग आसन",
+    tabMeditationCategory: "ध्यान और श्वास",
+    startTimer: "सत्र शुरू करें",
+    pauseTimer: "रोकें",
+    resumeTimer: "पुनः शुरू करें",
+    resetTimer: "रीसेट करें",
+    practiceCompleted: "सत्र पूरा हुआ! बहुत बढ़िया!",
+    benefitLabel: "उपयोगिता / लाभ",
+    durationLabel: "अनुशंसित अवधि",
+    pendingRequests: "लंबित अनुरोध",
+    acceptBtn: "स्वीकार करें",
+    declineBtn: "अस्वीकार करें",
+    statusPending: "अनुमोदन का इंतजार",
+    statusAccepted: "स्वीकृत",
+    statusDeclined: "अस्वीकृत",
+    counsellorBusyMsg: "काउंसलर वर्तमान में व्यस्त/अनुपलब्ध हैं और अनुरोध स्वीकार नहीं कर सके।",
+    requestSentSuccess: "आपके काउंसलर को मीटिंग का अनुरोध भेज दिया गया है!",
+    doctorAssignedGoals: "डॉक्टर द्वारा निर्दिष्ट लक्ष्य",
+    selfGoals: "स्वयं के लक्ष्य",
+    addGoalBtn: "लक्ष्य जोड़ें",
+    assignGoalBtn: "रोगी को लक्ष्य निर्दिष्ट करें",
+    assignedByLabel: "द्वारा निर्दिष्ट",
+    goalTitleLabel: "लक्ष्य का शीर्षक",
+    goalDescLabel: "लक्ष्य का विवरण",
+    dueDateLabel: "नियत तिथि",
+    inProgressLabel: "प्रगति पर है",
+    completedLabel: "पूरा हुआ",
+    emailRequiredErr: "कृपया एक मान्य ईमेल पता दर्ज करें।",
+    phoneRequiredErr: "कृपया 10-अंकों का मान्य फ़ोन नंबर दर्ज करें।",
+    reportSubmittedSuccess: "रिपोर्ट सफलतापूर्वक जमा हो गई है! हमारी सहायता टीम आपसे संपर्क करेगी।",
+    emailLabel: "ईमेल",
+    phoneLabelRequired: "फ़ोन नंबर"
   }
 };
 
@@ -598,4 +790,63 @@ export const useLanguage = () => {
     throw new Error('useLanguage must be used within a LanguageProvider');
   }
   return context;
+};
+
+const DYNAMIC_TRANSLATIONS: Record<string, { en: string; hi: string }> = {
+  "Crisis Check-in": { en: "Crisis Check-in", hi: "संकट चेक-इन" },
+  "Urgent crisis triage review following voice sentiment alert.": {
+    en: "Urgent crisis triage review following voice sentiment alert.",
+    hi: "वॉइस सेंटिमेंट अलर्ट के बाद आपातकालीन संकट समीक्षा।"
+  },
+  "Video Consultation": { en: "Video Consultation", hi: "वीडियो परामर्श" },
+  "Follow-up on recent livelihood loss trauma.": {
+    en: "Follow-up on recent livelihood loss trauma.",
+    hi: "हाल की आजीविका हानि के आघात पर अनुवर्ती कार्यवाही।"
+  },
+  "Weekly Therapy": { en: "Weekly Therapy", hi: "साप्ताहिक थेरेपी" },
+  "Routine weekly CBT session.": {
+    en: "Routine weekly CBT session.",
+    hi: "नियमित साप्ताहिक सीबीटी सत्र।"
+  },
+  "Audio Follow-up": { en: "Audio Follow-up", hi: "ऑडियो अनुवर्ती कार्यवाही" },
+  "Patient did not answer tele-consultation call.": {
+    en: "Patient did not answer tele-consultation call.",
+    hi: "रोगी ने टेली-परामर्श कॉल का उत्तर नहीं दिया।"
+  },
+  "Repeat no-show — 2nd consecutive missed session.": {
+    en: "Repeat no-show — 2nd consecutive missed session.",
+    hi: "पुनरावृत्ति गैर-हाजिरी — लगातार दूसरा छूटा हुआ सत्र।"
+  },
+  "Mindfulness modules reviewed successfully.": {
+    en: "Mindfulness modules reviewed successfully.",
+    hi: "माइंडफुलनेस मॉड्यूल की सफलतापूर्वक समीक्षा की गई।"
+  },
+  "Automated check-in update logged from patient mobile node.": {
+    en: "Automated check-in update logged from patient mobile node.",
+    hi: "रोगी मोबाइल नोड से स्वचालित चेक-इन अपडेट दर्ज किया गया।"
+  },
+  "Automated check-in update...": {
+    en: "Automated check-in update...",
+    hi: "स्वचालित चेक-इन अपडेट..."
+  },
+  "Trauma Counselling": { en: "Trauma Counselling", hi: "आघात परामर्श" },
+  "Crisis Intervention": { en: "Crisis Intervention", hi: "संकट हस्तक्षेप" },
+  "Adolescent Psychology": { en: "Adolescent Psychology", hi: "किशोरी मनोविज्ञान" },
+  "PTSD Therapy": { en: "PTSD Therapy", hi: "पीटीएसडी थेरेपी" },
+  "Anxiety & Panic Disorders": { en: "Anxiety & Panic Disorders", hi: "चिंता और घबराहट विकार" },
+  "Depression Support": { en: "Depression Support", hi: "अवसाद सहायता" },
+  "Victim Rehabilitation": { en: "Victim Rehabilitation", hi: "पीड़ित पुनर्वास" },
+  "Addiction Counselling": { en: "Addiction Counselling", hi: "व्यसन परामर्श" },
+  "Family Support": { en: "Family Support", hi: "पारिवारिक सहायता" },
+  "Dedicated clinical psychologist specializing in trauma care and adolescent mental well-being.": {
+    en: "Dedicated clinical psychologist specializing in trauma care and adolescent mental well-being.",
+    hi: "ट्रॉमा केयर और किशोर मानसिक कल्याण में विशेषज्ञता प्राप्त समर्पित नैदानिक मनोवैज्ञानिक।"
+  }
+};
+
+export const getDynamicText = (text: string, lang: SupportedLanguage): string => {
+  if (DYNAMIC_TRANSLATIONS[text]) {
+    return DYNAMIC_TRANSLATIONS[text][lang];
+  }
+  return text;
 };

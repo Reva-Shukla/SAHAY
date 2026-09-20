@@ -8,7 +8,7 @@ import { INDIAN_STATES_DISTRICTS, getStateDistricts } from '../data/statesAndDis
 import { Navbar } from '../components/Navbar';
 
 export const CounsellorLogin: React.FC = () => {
-  const { language, setLanguage } = useLanguage();
+  const { language, setLanguage, t } = useLanguage();
   const navigate = useNavigate();
   const { session, loginStep, login, completeOnboarding } = useAuth();
 
@@ -77,7 +77,7 @@ export const CounsellorLogin: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#e6f7f4] via-[#fefae0] to-[#e8f0fe] text-slate-900 flex flex-col justify-between relative overflow-hidden">
+    <div className="min-h-screen bg-cover bg-center bg-no-repeat text-slate-900 flex flex-col justify-between relative overflow-hidden" style={{ backgroundImage: 'url(/landing-bg.jpg)' }}>
       
       {/* Soft Ambient Blobs (No leaves) */}
       <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-emerald-200/30 rounded-full blur-[100px] pointer-events-none"></div>
@@ -293,13 +293,13 @@ export const CounsellorLogin: React.FC = () => {
             <div className="text-center space-y-2">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold">
                 <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                <span>Identity Verified</span>
+                <span>{t.identityVerified}</span>
               </div>
               <h2 className="text-2xl font-bold text-slate-900 tracking-tight">
-                Select Operational Jurisdiction
+                {t.selectJurisdiction}
               </h2>
               <p className="text-xs text-slate-600">
-                Choose your assigned State & District to load SAHAY jurisdiction-filtered patient monitoring cases.
+                {t.chooseAssigned}
               </p>
             </div>
 
@@ -311,12 +311,12 @@ export const CounsellorLogin: React.FC = () => {
                 <div>
                   <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5 flex items-center gap-1.5">
                     <MapPin className="w-4 h-4 text-indigo-600" />
-                    <span>Select Assigned State</span>
+                    <span>{t.selectState}</span>
                   </label>
                   <select
                     value={selectedState}
                     onChange={(e) => handleStateChange(e.target.value)}
-                    className="w-full px-4 py-2.5 rounded-2xl bg-slate-50 border border-slate-200 text-slate-900 text-sm focus:outline-none focus:border-indigo-500"
+                    className="w-full px-4 py-2.5 rounded-2xl bg-slate-50 border border-slate-200 text-slate-900 text-sm focus:outline-none focus:border-indigo-500 font-medium"
                   >
                     {INDIAN_STATES_DISTRICTS.map((s) => (
                       <option key={s.state} value={s.state}>
@@ -330,12 +330,12 @@ export const CounsellorLogin: React.FC = () => {
                 <div>
                   <label className="block text-xs font-semibold text-slate-700 mb-1.5 flex items-center gap-1.5">
                     <MapPin className="w-4 h-4 text-emerald-600" />
-                    <span>Select Assigned District / Area</span>
+                    <span>{t.selectDistrict}</span>
                   </label>
                   <select
                     value={selectedDistrict}
                     onChange={(e) => setSelectedDistrict(e.target.value)}
-                    className="w-full px-4 py-2.5 rounded-2xl bg-slate-50 border border-slate-200 text-slate-900 text-sm focus:outline-none focus:border-indigo-500"
+                    className="w-full px-4 py-2.5 rounded-2xl bg-slate-50 border border-slate-200 text-slate-900 text-sm focus:outline-none focus:border-indigo-500 font-medium"
                   >
                     {getStateDistricts(selectedState).map((d) => (
                       <option key={d} value={d}>
@@ -346,7 +346,7 @@ export const CounsellorLogin: React.FC = () => {
                 </div>
 
                 <div className="p-3.5 rounded-xl bg-indigo-50 border border-indigo-200 text-[11px] text-indigo-900">
-                  📍 <strong>Filter Guarantee:</strong> SAHAY dashboard will strictly display victim distress cases originating within <strong>{selectedDistrict}, {selectedState}</strong>.
+                  📍 <strong>{t.filterGuaranteePrefix}</strong> <strong>{selectedDistrict}, {selectedState}</strong>{t.filterGuaranteeSuffix}
                 </div>
 
                 <button

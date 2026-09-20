@@ -56,7 +56,10 @@ export interface ChatMessage {
   type: 'text' | 'voice';
   audioUrl?: string;
   durationSeconds?: number;
+  isHighPriority?: boolean;
 }
+
+export type MeetingStatus = 'pending' | 'upcoming' | 'accepted' | 'missed' | 'started' | 'completed' | 'declined';
 
 export interface CounsellorMeeting {
   id: string;
@@ -64,10 +67,31 @@ export interface CounsellorMeeting {
   patientAlias: string;
   date: string; // YYYY-MM-DD
   time: string; // e.g. "10:30 AM"
-  status: 'upcoming' | 'missed' | 'started' | 'completed';
+  status: MeetingStatus;
   type: 'Video Consultation' | 'Audio Follow-up' | 'Crisis Check-in' | 'Weekly Therapy';
   riskLevel: RiskLevel;
   notes?: string;
+  meetUrl?: string;
+}
+
+export interface SharedGoal {
+  id: string;
+  caseId: string;
+  title: string;
+  description: string;
+  assignedBy: 'counsellor' | 'patient';
+  dueDate?: string;
+  completed: boolean;
+  createdAt: string;
+}
+
+export interface ProblemReport {
+  id: string;
+  issueType: string;
+  description: string;
+  email: string;
+  phone: string;
+  timestamp: string;
 }
 
 export interface SOSAlert {
