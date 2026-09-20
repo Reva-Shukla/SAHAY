@@ -17,32 +17,45 @@ export const LandingPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#fef5f0] via-[#fcfaf2] to-[#e8f7f2] text-slate-900 flex flex-col justify-between relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-[#fde2e4] via-[#fff5eb] to-[#e4f6ed] text-slate-900 flex flex-col justify-between relative overflow-hidden">
       
       {/* Background Decorative Soft Pastel Blobs & Silhouette Illustrations */}
-      <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-emerald-200/25 rounded-full blur-[100px] pointer-events-none"></div>
-      <div className="absolute top-1/4 right-0 w-[600px] h-[600px] bg-rose-200/25 rounded-full blur-[100px] pointer-events-none"></div>
-      <div className="absolute bottom-0 left-1/4 w-[700px] h-[700px] bg-amber-100/35 rounded-full blur-[120px] pointer-events-none"></div>
+      <div className="absolute top-0 right-0 w-[650px] h-[650px] bg-[#d8f3dc]/40 rounded-full blur-[90px] pointer-events-none"></div>
+      <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[700px] h-[600px] bg-[#ffcad4]/50 rounded-full blur-[100px] pointer-events-none"></div>
+      <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-[#f4acb7]/35 rounded-full blur-[110px] pointer-events-none"></div>
+      <div className="absolute bottom-10 right-10 w-[550px] h-[550px] bg-[#b7e4c7]/40 rounded-full blur-[100px] pointer-events-none"></div>
 
       {/* SVG Corner Plant/Leaves Illustration (Top-Right) */}
-      <svg className="absolute top-12 right-0 w-72 h-[420px] pointer-events-none opacity-40 sm:opacity-50" viewBox="0 0 240 360" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M220 40 Q160 20 135 90 Q120 140 180 165 Q230 140 220 40 Z" fill="#93c5fd" opacity="0.4"/>
-        <path d="M240 110 Q190 95 175 145 Q170 185 210 205 Q245 185 240 110 Z" fill="#6ee7b7" opacity="0.6"/>
-        <path d="M190 180 Q140 170 130 215 Q120 260 175 275 Q220 250 190 180 Z" fill="#a7f3d0" opacity="0.7"/>
-        <path d="M210 250 Q170 240 160 280 Q150 320 190 335 Q225 315 210 250 Z" fill="#34d399" opacity="0.5"/>
+      <svg className="absolute top-0 right-0 w-80 sm:w-96 h-[480px] pointer-events-none opacity-45 sm:opacity-55" viewBox="0 0 300 420" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M280 20 Q200 0 160 80 Q140 140 210 170 Q280 140 280 20 Z" fill="#a7f3d0" opacity="0.6"/>
+        <path d="M300 90 Q230 75 210 135 Q200 185 250 210 Q300 185 300 90 Z" fill="#6ee7b7" opacity="0.7"/>
+        <path d="M230 160 Q170 150 155 205 Q140 260 210 280 Q270 250 230 160 Z" fill="#34d399" opacity="0.5"/>
+        <path d="M260 240 Q210 230 195 275 Q180 320 230 340 Q280 315 260 240 Z" fill="#818cf8" opacity="0.3"/>
       </svg>
 
       {/* SVG Corner People/Support Silhouette Illustration (Bottom-Left) */}
-      <svg className="absolute bottom-0 left-0 w-80 h-64 pointer-events-none opacity-30 sm:opacity-45" viewBox="0 0 320 240" fill="none" xmlns="http://www.w3.org/2000/svg">
-        {/* Support Silhouette Figures */}
-        <circle cx="50" cy="120" r="16" fill="#312e81"/>
-        <path d="M30 180 C30 145 70 145 70 180 Z" fill="#312e81"/>
-        <circle cx="105" cy="115" r="18" fill="#1e3a8a"/>
-        <path d="M80 180 C80 138 130 138 130 180 Z" fill="#1e3a8a"/>
-        <path d="M45 145 Q75 135 95 145" stroke="#312e81" strokeWidth="4" strokeLinecap="round"/>
-        {/* Bottom Leaves */}
-        <path d="M140 180 Q165 140 205 160 Q235 170 215 210 Q175 220 140 180 Z" fill="#a7f3d0" opacity="0.6"/>
-        <path d="M200 200 Q220 170 250 185 Q270 195 255 225 Q230 230 200 200 Z" fill="#6ee7b7" opacity="0.5"/>
+      <svg className="absolute bottom-0 left-0 w-88 sm:w-[420px] h-72 sm:h-80 pointer-events-none opacity-40 sm:opacity-55" viewBox="0 0 420 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+        {/* Soft Warm Purple-Pink Silhouette Group Walking Together & Offering Support */}
+        <g opacity="0.85">
+          {/* Person 1 - Left */}
+          <circle cx="70" cy="140" r="15" fill="#9d4edd"/>
+          <path d="M50 240 C50 180 90 180 90 240 Z" fill="#9d4edd"/>
+          {/* Person 2 - Center Left (Arm around Person 3) */}
+          <circle cx="125" cy="125" r="17" fill="#c77dff"/>
+          <path d="M100 240 C100 165 150 165 150 240 Z" fill="#c77dff"/>
+          {/* Support Connection Arc / Shared Shoulder */}
+          <path d="M120 160 Q150 150 180 160" stroke="#e0aaff" strokeWidth="8" strokeLinecap="round"/>
+          {/* Person 3 - Center Right */}
+          <circle cx="175" cy="130" r="16" fill="#b5e2fa"/>
+          <path d="M152 240 C152 170 198 170 198 240 Z" fill="#e0aaff"/>
+          {/* Person 4 - Right */}
+          <circle cx="225" cy="145" r="14" fill="#ff99c8"/>
+          <path d="M205 240 C205 188 245 188 245 240 Z" fill="#ff99c8"/>
+        </g>
+        {/* Soft Decorative Ground Flow & Leaves */}
+        <path d="M0 240 Q120 220 250 245 Q350 260 420 240 L420 300 L0 300 Z" fill="#f4acb7" opacity="0.3"/>
+        <path d="M180 230 Q220 180 270 205 Q310 220 280 260 Q230 270 180 230 Z" fill="#b7e4c7" opacity="0.5"/>
+        <path d="M260 245 Q290 210 330 225 Q360 235 340 265 Q300 275 260 245 Z" fill="#95d5b2" opacity="0.4"/>
       </svg>
 
       {/* Top Header Navigation */}
