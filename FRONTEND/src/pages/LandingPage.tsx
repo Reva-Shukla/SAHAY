@@ -17,7 +17,7 @@ export const LandingPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#fde2e4] via-[#fff5eb] to-[#e4f6ed] text-slate-900 flex flex-col justify-between relative overflow-hidden">
+    <div className="min-h-screen bg-cover bg-center bg-no-repeat text-slate-900 flex flex-col justify-between relative overflow-hidden" style={{ backgroundImage: 'url(/landing-bg.jpg)' }}>
       
       {/* Background Decorative Soft Pastel Blobs & Silhouette Illustrations */}
       <div className="absolute top-0 right-0 w-[650px] h-[650px] bg-[#d8f3dc]/40 rounded-full blur-[90px] pointer-events-none"></div>
