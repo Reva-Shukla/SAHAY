@@ -8,7 +8,13 @@ export const AUTHORISED_COUNSELLORS: AuthorisedCounsellor[] = [
     password: "password123",
     department: "National Tele-MANAS Cell",
     designation: "Senior Clinical Psychologist",
-    badge: "Official SAHAY Verified"
+    badge: "Official SAHAY Verified",
+    avatar: "https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&w=250&q=80",
+    qualifications: "M.D. Psychiatry (AIIMS New Delhi), Ph.D. Clinical Psychology",
+    specializations: ["Trauma Counselling", "Crisis Intervention", "Adolescent Psychology", "PTSD Therapy"],
+    yearsOfExperience: 14,
+    bio: "Senior Clinical Psychologist at Tele-MANAS Cell specializing in high-distress crisis management, suicide prevention protocols, and trauma-informed cognitive behavioral therapy.",
+    onlineStatus: "Available Online"
   },
   {
     counsellorId: "CNS-1092",
@@ -17,7 +23,13 @@ export const AUTHORISED_COUNSELLORS: AuthorisedCounsellor[] = [
     password: "password123",
     department: "District Mental Health Officer",
     designation: "Lead Distress Interventionist",
-    badge: "Official SAHAY Verified"
+    badge: "Official SAHAY Verified",
+    avatar: "https://images.unsplash.com/photo-1594824813566-8185b378c7d6?auto=format&fit=crop&w=250&q=80",
+    qualifications: "M.Sc. Applied Psychology (NIMHANS Bengaluru)",
+    specializations: ["Anxiety & Panic Disorders", "Depression Support", "Youth Mental Health"],
+    yearsOfExperience: 9,
+    bio: "Lead interventionist focusing on community-level mental health triage and tele-counselling for district distress networks.",
+    onlineStatus: "Available Online"
   },
   {
     counsellorId: "CNS-3310",
@@ -26,7 +38,13 @@ export const AUTHORISED_COUNSELLORS: AuthorisedCounsellor[] = [
     password: "password123",
     department: "Victim Rehabilitation Directorate",
     designation: "Chief Medical Officer",
-    badge: "Official SAHAY Verified"
+    badge: "Official SAHAY Verified",
+    avatar: "https://images.unsplash.com/photo-1537368910025-700350fe46c7?auto=format&fit=crop&w=250&q=80",
+    qualifications: "M.B.B.S., D.P.M. Neuropsychiatry",
+    specializations: ["Victim Rehabilitation", "Addiction Counselling", "Stress Management"],
+    yearsOfExperience: 18,
+    bio: "Chief Medical Officer overseeing victim rehabilitation, emergency medical protocols, and psychosocial support systems.",
+    onlineStatus: "Busy"
   },
   {
     counsellorId: "CNS-5541",
@@ -35,7 +53,13 @@ export const AUTHORISED_COUNSELLORS: AuthorisedCounsellor[] = [
     password: "password123",
     department: "Social Defence Division",
     designation: "Psychosocial Counsellor",
-    badge: "Official SAHAY Verified"
+    badge: "Official SAHAY Verified",
+    avatar: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=250&q=80",
+    qualifications: "M.S.W. Psychiatric Social Work",
+    specializations: ["Family Counselling", "Domestic Violence Support", "Grief Counselling"],
+    yearsOfExperience: 7,
+    bio: "Psychosocial counsellor specialized in victim advocacy, family dispute intervention, and grief recovery modules.",
+    onlineStatus: "Offline"
   },
   {
     counsellorId: "CNS-7729",
@@ -44,7 +68,13 @@ export const AUTHORISED_COUNSELLORS: AuthorisedCounsellor[] = [
     password: "password123",
     department: "National Institute of Social Defence",
     designation: "Crisis Response Specialist",
-    badge: "Official SAHAY Verified"
+    badge: "Official SAHAY Verified",
+    avatar: "https://images.unsplash.com/photo-1551836022-d5d88e9218df?auto=format&fit=crop&w=250&q=80",
+    qualifications: "Ph.D. Behavioural Sciences",
+    specializations: ["Crisis Intervention", "Cognitive Behavioral Therapy", "Mindfulness"],
+    yearsOfExperience: 12,
+    bio: "Crisis response expert driving AI-assisted distress scoring verification and Tele-MANAS hotline quality assurance.",
+    onlineStatus: "Available Online"
   },
   {
     counsellorId: "CNS-9914",
@@ -53,6 +83,12 @@ export const AUTHORISED_COUNSELLORS: AuthorisedCounsellor[] = [
     password: "password123",
     department: "Tele-MANAS Regional Node",
     designation: "Clinical Supervisor",
-    badge: "Official SAHAY Verified"
+    badge: "Official SAHAY Verified",
+    avatar: "https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=250&q=80",
+    qualifications: "M.Phil. Clinical Psychology",
+    specializations: ["Tele-Counselling Triage", "Occupational Stress", "Emergency Dispatch"],
+    yearsOfExperience: 11,
+    bio: "Clinical supervisor managing district emergency dispatches and multi-jurisdictional responder routing.",
+    onlineStatus: "Available Online"
   }
 ];

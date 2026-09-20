@@ -214,6 +214,20 @@ export const CounsellorLogin: React.FC = () => {
                   </div>
                 </div>
 
+                {/* Remember Me Checkbox */}
+                <div className="flex items-center justify-between text-xs pt-1">
+                  <label className="flex items-center gap-2 cursor-pointer text-slate-700 font-medium select-none">
+                    <input
+                      type="checkbox"
+                      checked={useAuth().rememberMe}
+                      onChange={(e) => useAuth().setRememberMe(e.target.checked)}
+                      className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300"
+                    />
+                    <span>Remember Me on this device</span>
+                  </label>
+                  <span className="text-[10px] text-slate-400 font-mono" title="Uses local session token storage for demo mode">(Persistent Session)</span>
+                </div>
+
                 {/* Error Banner with Framer Motion Entrance */}
                 <AnimatePresence>
                   {errorMessage && (

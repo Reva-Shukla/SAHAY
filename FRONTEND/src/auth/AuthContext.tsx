@@ -5,13 +5,12 @@
  * In a production environment, jurisdiction filtering MUST take place on the backend
  * API server (e.g. database-level row filtering based on verified JWT role claims).
  * Never rely on client-side filtering alone for sensitive mental health victim data.
- * This frontend mock implementation is strictly for demonstration and hackathon UI/UX
- * validation (Smart India Hackathon 2026 - SAHAY Portal).
- * Session tokens are preserved strictly in memory (React State) to prevent token exposure.
+ * Production auth should use secure httpOnly cookies; for demonstration and rememberMe,
+ * localStorage is optionally populated when the user checks "Remember Me".
  * =====================================================================================
  */
 
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
 import type { CounsellorSession, AuthorisedCounsellor, AuditLogEntry } from '../types';
 import { AUTHORISED_COUNSELLORS } from '../data/counsellors';
@@ -19,21 +18,43 @@ import { AUTHORISED_COUNSELLORS } from '../data/counsellors';
 interface AuthContextType {
   session: CounsellorSession | null;
   pendingCounsellor: AuthorisedCounsellor | null;
+  counsellorsList: AuthorisedCounsellor[];
   auditLogs: AuditLogEntry[];
   loginStep: 'CREDENTIALS' | 'ONBOARDING' | 'AUTHENTICATED';
-  login: (email: string, pass: string, counsellorId: string) => { success: boolean; error?: string };
+  rememberMe: boolean;
+  setRememberMe: (val: boolean) => void;
+  login: (email: string, pass: string, counsellorId: string, remember?: boolean) => { success: boolean; error?: string };
   completeOnboarding: (state: string, district: string) => void;
   logout: () => void;
+  updateCounsellorProfile: (updated: Partial<AuthorisedCounsellor>) => void;
   logAuditAction: (action: string, details: string, caseId?: string, status?: 'SUCCESS' | 'DENIED' | 'FLAGGED') => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [session, setSession] = useState<CounsellorSession | null>(null);
+  const [counsellorsList, setCounsellorsList] = useState<AuthorisedCounsellor[]>(() => {
+    const saved = localStorage.getItem('sahay_counsellors');
+    return saved ? JSON.parse(saved) : AUTHORISED_COUNSELLORS;
+  });
+
+  const [session, setSession] = useState<CounsellorSession | null>(() => {
+    const saved = localStorage.getItem('sahay_counsellor_session');
+    return saved ? JSON.parse(saved) : null;
+  });
+
   const [pendingCounsellor, setPendingCounsellor] = useState<AuthorisedCounsellor | null>(null);
-  const [loginStep, setLoginStep] = useState<'CREDENTIALS' | 'ONBOARDING' | 'AUTHENTICATED'>('CREDENTIALS');
+  const [loginStep, setLoginStep] = useState<'CREDENTIALS' | 'ONBOARDING' | 'AUTHENTICATED'>(() => {
+    const saved = localStorage.getItem('sahay_counsellor_session');
+    return saved ? 'AUTHENTICATED' : 'CREDENTIALS';
+  });
+
+  const [rememberMe, setRememberMe] = useState<boolean>(true);
   const [auditLogs, setAuditLogs] = useState<AuditLogEntry[]>([]);
+
+  useEffect(() => {
+    localStorage.setItem('sahay_counsellors', JSON.stringify(counsellorsList));
+  }, [counsellorsList]);
 
   const logAuditAction = (
     action: string,
@@ -52,14 +73,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     };
 
     setAuditLogs(prev => [newEntry, ...prev]);
-
-    // Audit log simulated console output for accountability compliance
     console.warn(`[SECURITY AUDIT LOG] [${newEntry.status}] ${newEntry.timestamp} | Counsellor: ${newEntry.counsellorId} | Action: ${action} | Details: ${details}`);
   };
 
-  const login = (email: string, pass: string, counsellorId: string) => {
-    // BACKEND INTEGRATION POINT: POST /api/auth/counsellor-login (real credential + ID verification)
-    const match = AUTHORISED_COUNSELLORS.find(
+  const login = (email: string, pass: string, counsellorId: string, remember: boolean = true) => {
+    setRememberMe(remember);
+    const match = counsellorsList.find(
       c => c.counsellorId.toUpperCase() === counsellorId.trim().toUpperCase() &&
            c.email.toLowerCase() === email.trim().toLowerCase() &&
            c.password === pass
@@ -78,7 +97,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       };
     }
 
-    // Move to onboarding step (Jurisdiction selection)
     setPendingCounsellor(match);
     setLoginStep('ONBOARDING');
     logAuditAction('CREDENTIAL_VERIFIED', `Credentials verified for ${match.name} (${match.counsellorId}). Pending state/district selection.`);
@@ -88,7 +106,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const completeOnboarding = (assignedState: string, assignedDistrict: string) => {
     if (!pendingCounsellor) return;
 
-    // Simulate in-memory JWT bearer token with state and district claim payloads
     const mockJwt = `header.${btoa(JSON.stringify({
       sub: pendingCounsellor.counsellorId,
       name: pendingCounsellor.name,
@@ -113,12 +130,40 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setSession(newSession);
     setLoginStep('AUTHENTICATED');
 
+    if (rememberMe) {
+      // NOTE FOR PRODUCTION AUDIT:
+      // Production apps must store JWTs in secure httpOnly, SameSite=Strict cookies rather than localStorage.
+      localStorage.setItem('sahay_counsellor_session', JSON.stringify(newSession));
+    } else {
+      localStorage.removeItem('sahay_counsellor_session');
+    }
+
     logAuditAction(
       'SESSION_ESTABLISHED',
-      `Authorized session granted under jurisdiction: ${assignedDistrict}, ${assignedState}`,
+      `Authorized session granted under jurisdiction: ${assignedDistrict}, ${assignedState} (RememberMe: ${rememberMe})`,
       undefined,
       'SUCCESS'
     );
+  };
+
+  const updateCounsellorProfile = (updated: Partial<AuthorisedCounsellor>) => {
+    if (!session) return;
+    setCounsellorsList(prev => prev.map(c => {
+      if (c.counsellorId === session.counsellorId) {
+        return { ...c, ...updated };
+      }
+      return c;
+    }));
+
+    if (updated.name || updated.designation) {
+      setSession(prev => prev ? {
+        ...prev,
+        name: updated.name || prev.name,
+        designation: updated.designation || prev.designation
+      } : null);
+    }
+
+    logAuditAction('PROFILE_UPDATED', `Counsellor ${session.counsellorId} updated their clinical profile details.`);
   };
 
   const logout = () => {
@@ -128,6 +173,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setSession(null);
     setPendingCounsellor(null);
     setLoginStep('CREDENTIALS');
+    localStorage.removeItem('sahay_counsellor_session');
   };
 
   return (
@@ -135,11 +181,15 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       value={{
         session,
         pendingCounsellor,
+        counsellorsList,
         auditLogs,
         loginStep,
+        rememberMe,
+        setRememberMe,
         login,
         completeOnboarding,
         logout,
+        updateCounsellorProfile,
         logAuditAction
       }}
     >

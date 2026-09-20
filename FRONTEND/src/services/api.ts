@@ -63,3 +63,65 @@ export const submitPatientCheckIn = async (payload: PatientCheckInPayload): Prom
     message: "Check-in logged securely. Your state mental health response team is active."
   };
 };
+
+/**
+ * BACKEND INTEGRATION POINT: GET /api/messages?caseId= / WebSocket /ws/chat
+ * Retrieves full conversation history between assigned counsellor and patient case.
+ */
+export const fetchChatMessages = async (caseId: string) => {
+  await delay(200);
+  const saved = localStorage.getItem('sahay_chats');
+  const chats = saved ? JSON.parse(saved) : {};
+  return chats[caseId] || [];
+};
+
+/**
+ * BACKEND INTEGRATION POINT: POST /api/messages (text/voice)
+ * Sends text or voice message to patient thread and broadcasts via WebSocket.
+ */
+export const sendChatMessageApi = async (messageData: any) => {
+  await delay(300);
+  console.log('[API POST /api/messages]', messageData);
+  return { success: true, messageId: `msg-${Date.now()}` };
+};
+
+/**
+ * BACKEND INTEGRATION POINT: GET /api/meetings?counsellorId=
+ * Fetches scheduled tele-consultation meetings for counsellor's assigned cases.
+ */
+export const fetchCounsellorMeetingsApi = async () => {
+  await delay(250);
+  const saved = localStorage.getItem('sahay_meetings');
+  return saved ? JSON.parse(saved) : [];
+};
+
+/**
+ * BACKEND INTEGRATION POINT: POST /api/sos/:caseId/resolve
+ * Resolves active SOS emergency alert with mandatory dispatch/notes confirmation.
+ */
+export const resolveSosAlertApi = async (sosId: string, action: string, notes: string) => {
+  await delay(400);
+  console.log('[API POST /api/sos/:caseId/resolve]', { sosId, action, notes });
+  return { success: true, timestamp: new Date().toISOString() };
+};
+
+/**
+ * BACKEND INTEGRATION POINT: GET /api/reports?caseId=
+ * Retrieves shared mental health trajectory reports submitted by patients.
+ */
+export const fetchSharedReportsApi = async (caseId: string) => {
+  await delay(250);
+  const saved = localStorage.getItem('sahay_shared_reports');
+  const reports = saved ? JSON.parse(saved) : [];
+  return reports.filter((r: any) => r.caseId === caseId);
+};
+
+/**
+ * BACKEND INTEGRATION POINT: PUT /api/counsellor/profile
+ * Updates counsellor's clinical credentials, bio, and specializations.
+ */
+export const updateCounsellorProfileApi = async (profileData: any) => {
+  await delay(400);
+  console.log('[API PUT /api/counsellor/profile]', profileData);
+  return { success: true };
+};

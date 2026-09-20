@@ -8,7 +8,7 @@ import { useLanguage } from '../context/LanguageContext';
 export const Navbar: React.FC<{ highRiskCount?: number }> = ({ highRiskCount = 0 }) => {
   const location = useLocation();
   const { session, logout } = useAuth();
-  const { t } = useLanguage();
+  const { language, setLanguage, t } = useLanguage();
   const isPatientView = location.pathname.startsWith('/patient');
 
   return (
@@ -62,6 +62,32 @@ export const Navbar: React.FC<{ highRiskCount?: number }> = ({ highRiskCount = 0
                     <p className="font-bold text-slate-900 leading-tight">{session.name}</p>
                     <p className="text-[10px] text-indigo-600 font-mono">{session.counsellorId}</p>
                   </div>
+                </div>
+
+                {/* Language Switcher Pill */}
+                <div className="flex items-center gap-1 bg-slate-100 p-0.5 rounded-lg border border-slate-200">
+                  <button
+                    onClick={() => {
+                      setLanguage('en');
+                      localStorage.setItem('sahay_language', 'en');
+                    }}
+                    className={`px-2 py-0.5 rounded font-bold text-[10px] transition-all ${
+                      language === 'en' ? 'bg-indigo-600 text-white shadow-xs' : 'text-slate-600 hover:text-slate-900'
+                    }`}
+                  >
+                    EN
+                  </button>
+                  <button
+                    onClick={() => {
+                      setLanguage('hi');
+                      localStorage.setItem('sahay_language', 'hi');
+                    }}
+                    className={`px-2 py-0.5 rounded font-bold text-[10px] transition-all ${
+                      language === 'hi' ? 'bg-indigo-600 text-white shadow-xs' : 'text-slate-600 hover:text-slate-900'
+                    }`}
+                  >
+                    HI
+                  </button>
                 </div>
 
                 {/* Animated High Risk Alert Bell */}

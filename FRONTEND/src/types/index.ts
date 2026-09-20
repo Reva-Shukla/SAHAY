@@ -38,6 +38,66 @@ export interface AuthorisedCounsellor {
   department: string;
   designation: string;
   badge: string;
+  avatar?: string;
+  qualifications?: string;
+  specializations?: string[];
+  yearsOfExperience?: number;
+  bio?: string;
+  onlineStatus?: 'Available Online' | 'Busy' | 'Offline';
+}
+
+export interface ChatMessage {
+  id: string | number;
+  caseId: string;
+  text: string;
+  sender: 'counsellor' | 'patient';
+  time: string;
+  timestamp: number;
+  type: 'text' | 'voice';
+  audioUrl?: string;
+  durationSeconds?: number;
+}
+
+export interface CounsellorMeeting {
+  id: string;
+  caseId: string;
+  patientAlias: string;
+  date: string; // YYYY-MM-DD
+  time: string; // e.g. "10:30 AM"
+  status: 'upcoming' | 'missed' | 'started' | 'completed';
+  type: 'Video Consultation' | 'Audio Follow-up' | 'Crisis Check-in' | 'Weekly Therapy';
+  riskLevel: RiskLevel;
+  notes?: string;
+}
+
+export interface SOSAlert {
+  id: string;
+  caseId: string;
+  patientAlias: string;
+  distressScore: number;
+  scoreTrend: 'rising' | 'falling' | 'stable';
+  timestamp: string;
+  state: string;
+  district: string;
+  status: 'ACTIVE' | 'DISPATCHED' | 'RESOLVED';
+  resolvedAt?: string;
+  resolutionNotes?: string;
+  actionTaken?: 'Dispatch Emergency Team' | 'Resolve — No Team Needed';
+  locationGrantedDurationHours?: number;
+}
+
+export interface SharedMentalHealthReport {
+  id: string;
+  caseId: string;
+  patientAlias: string;
+  dateShared: string;
+  dateRange: string;
+  averageMood: string;
+  averageSleep: string;
+  topTriggers: string[];
+  topActivities: string[];
+  summaryText: string;
+  counsellorNotes?: string;
 }
 
 export interface CounsellorSession {
