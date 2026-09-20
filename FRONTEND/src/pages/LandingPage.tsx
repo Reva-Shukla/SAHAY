@@ -17,22 +17,32 @@ export const LandingPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#e6f7f4] via-[#fefae0] to-[#e8f0fe] text-slate-900 flex flex-col justify-between relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-[#fef5f0] via-[#fcfaf2] to-[#e8f7f2] text-slate-900 flex flex-col justify-between relative overflow-hidden">
       
-      {/* Background Decorative Ambient Pastel Blobs */}
-      <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-emerald-200/30 rounded-full blur-[100px] pointer-events-none"></div>
-      <div className="absolute top-1/4 right-0 w-[600px] h-[600px] bg-indigo-200/30 rounded-full blur-[100px] pointer-events-none"></div>
-      <div className="absolute bottom-0 left-1/4 w-[700px] h-[700px] bg-amber-100/40 rounded-full blur-[120px] pointer-events-none"></div>
+      {/* Background Decorative Soft Pastel Blobs & Silhouette Illustrations */}
+      <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-emerald-200/25 rounded-full blur-[100px] pointer-events-none"></div>
+      <div className="absolute top-1/4 right-0 w-[600px] h-[600px] bg-rose-200/25 rounded-full blur-[100px] pointer-events-none"></div>
+      <div className="absolute bottom-0 left-1/4 w-[700px] h-[700px] bg-amber-100/35 rounded-full blur-[120px] pointer-events-none"></div>
 
-      {/* SVG Leaves Decorative Element */}
-      <svg className="absolute top-20 right-0 w-64 h-96 pointer-events-none opacity-60" viewBox="0 0 200 300" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M180 50 Q130 30 110 80 Q100 120 150 140 Q190 120 180 50 Z" fill="#bce4d0"/>
-        <path d="M195 100 Q155 90 145 130 Q140 160 175 175 Q205 160 195 100 Z" fill="#9cd3bc"/>
-        <path d="M160 160 Q120 150 110 190 Q100 230 145 245 Q185 220 160 160 Z" fill="#d1eedf"/>
+      {/* SVG Corner Plant/Leaves Illustration (Top-Right) */}
+      <svg className="absolute top-12 right-0 w-72 h-[420px] pointer-events-none opacity-40 sm:opacity-50" viewBox="0 0 240 360" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M220 40 Q160 20 135 90 Q120 140 180 165 Q230 140 220 40 Z" fill="#93c5fd" opacity="0.4"/>
+        <path d="M240 110 Q190 95 175 145 Q170 185 210 205 Q245 185 240 110 Z" fill="#6ee7b7" opacity="0.6"/>
+        <path d="M190 180 Q140 170 130 215 Q120 260 175 275 Q220 250 190 180 Z" fill="#a7f3d0" opacity="0.7"/>
+        <path d="M210 250 Q170 240 160 280 Q150 320 190 335 Q225 315 210 250 Z" fill="#34d399" opacity="0.5"/>
       </svg>
-      <svg className="absolute bottom-10 left-10 w-48 h-48 pointer-events-none opacity-60" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M30 150 Q50 100 100 120 Q140 130 120 180 Q80 190 30 150 Z" fill="#bce4d0"/>
-        <path d="M10 180 Q40 140 80 160 Q110 170 90 200 Q50 210 10 180 Z" fill="#9cd3bc"/>
+
+      {/* SVG Corner People/Support Silhouette Illustration (Bottom-Left) */}
+      <svg className="absolute bottom-0 left-0 w-80 h-64 pointer-events-none opacity-30 sm:opacity-45" viewBox="0 0 320 240" fill="none" xmlns="http://www.w3.org/2000/svg">
+        {/* Support Silhouette Figures */}
+        <circle cx="50" cy="120" r="16" fill="#312e81"/>
+        <path d="M30 180 C30 145 70 145 70 180 Z" fill="#312e81"/>
+        <circle cx="105" cy="115" r="18" fill="#1e3a8a"/>
+        <path d="M80 180 C80 138 130 138 130 180 Z" fill="#1e3a8a"/>
+        <path d="M45 145 Q75 135 95 145" stroke="#312e81" strokeWidth="4" strokeLinecap="round"/>
+        {/* Bottom Leaves */}
+        <path d="M140 180 Q165 140 205 160 Q235 170 215 210 Q175 220 140 180 Z" fill="#a7f3d0" opacity="0.6"/>
+        <path d="M200 200 Q220 170 250 185 Q270 195 255 225 Q230 230 200 200 Z" fill="#6ee7b7" opacity="0.5"/>
       </svg>
 
       {/* Top Header Navigation */}

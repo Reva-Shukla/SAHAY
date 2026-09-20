@@ -230,7 +230,24 @@ export const CounsellorDashboard: React.FC = () => {
   // =========================================================================
   // 3. EMERGENCY SOS DISPATCH & RESOLUTION MODAL STATE
   // =========================================================================
-  const activeSosModalAlert = sosAlerts.find(a => a.status === 'ACTIVE');
+  // Track targeted active SOS alert ID (defaults to first active SOS if present)
+  const activeSosAlertsList = sosAlerts.filter(a => a.status === 'ACTIVE');
+  const [selectedSosAlertId, setSelectedSosAlertId] = useState<string | null>(null);
+
+  // Helper handler when an SOS alert notification is clicked (from top banner, notification bell, or SOS tab list)
+  const handleSelectSosAlert = (targetCaseId: string) => {
+    setSelectedCaseId(targetCaseId);
+    const matchingSos = sosAlerts.find(a => a.caseId === targetCaseId && a.status === 'ACTIVE') || sosAlerts.find(a => a.caseId === targetCaseId);
+    if (matchingSos) {
+      setSelectedSosAlertId(matchingSos.id);
+    }
+    setActiveTab('SOS');
+  };
+
+  const activeSosModalAlert = sosAlerts.find(a => a.id === selectedSosAlertId && a.status === 'ACTIVE') ||
+    sosAlerts.find(a => a.caseId === selectedCaseId && a.status === 'ACTIVE') ||
+    activeSosAlertsList[0];
+
   const [sosActionChoice, setSosActionChoice] = useState<'Dispatch Emergency Team' | 'Resolve — No Team Needed'>('Dispatch Emergency Team');
   const [sosNotes, setSosNotes] = useState('');
   const [sosConfirmationStep, setSosConfirmationStep] = useState(false);
@@ -244,10 +261,10 @@ export const CounsellorDashboard: React.FC = () => {
       return;
     }
 
-    const resolvedAt = new Date().toISOString();
+    const resolvedAt = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + ', ' + new Date().toLocaleDateString();
     setSosAlerts(prev => prev.map(a => a.id === activeSosModalAlert.id ? {
       ...a,
-      status: a.actionTaken === 'Dispatch Emergency Team' || sosActionChoice === 'Dispatch Emergency Team' ? 'DISPATCHED' : 'RESOLVED',
+      status: sosActionChoice === 'Dispatch Emergency Team' ? 'DISPATCHED' : 'RESOLVED',
       actionTaken: sosActionChoice,
       resolutionNotes: sosNotes.trim(),
       resolvedAt,
@@ -265,16 +282,23 @@ export const CounsellorDashboard: React.FC = () => {
   };
 
   // =========================================================================
-  // 4. SHARED PATIENT REPORTS PRIVATE NOTES STATE
+  // 4. SHARED PATIENT REPORTS PRIVATE NOTES STATE & PERSISTENT SAVED STATE
   // =========================================================================
   const [reportNoteText, setReportNoteText] = useState<Record<string, string>>({});
+  const [editingReportNotes, setEditingReportNotes] = useState<Record<string, boolean>>({});
 
   const handleSaveReportNote = (reportId: string) => {
     const note = reportNoteText[reportId];
-    if (!note) return;
+    if (!note || !note.trim()) return;
 
-    setSharedReports(prev => prev.map(r => r.id === reportId ? { ...r, counsellorNotes: note } : r));
+    setSharedReports(prev => prev.map(r => r.id === reportId ? { ...r, counsellorNotes: note.trim() } : r));
+    setEditingReportNotes(prev => ({ ...prev, [reportId]: false }));
     logAuditAction('REPORT_NOTE_ADDED', `Added private clinical note to shared report ${reportId}`);
+  };
+
+  const handleEditReportNote = (reportId: string, existingNote: string) => {
+    setReportNoteText(prev => ({ ...prev, [reportId]: existingNote }));
+    setEditingReportNotes(prev => ({ ...prev, [reportId]: true }));
   };
 
   // =========================================================================
@@ -339,11 +363,11 @@ export const CounsellorDashboard: React.FC = () => {
       <div className="absolute bottom-0 right-0 w-[600px] h-[600px] bg-indigo-200/30 rounded-full blur-[100px] pointer-events-none"></div>
 
       <div className="relative z-10 flex flex-col min-h-screen">
-        <Navbar highRiskCount={highRiskCount} />
+        <Navbar highRiskCount={highRiskCount} sosAlerts={sosAlerts} onSelectSosAlert={handleSelectSosAlert} />
 
         {/* PROMINENT ANIMATED SOS URGENT BANNER */}
         <AnimatePresence>
-          {activeSosCount > 0 && (
+          {activeSosCount > 0 && activeSosModalAlert && (
             <motion.div
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -360,13 +384,13 @@ export const CounsellorDashboard: React.FC = () => {
                       🚨 CRITICAL SOS DISTRESS SIGNAL ACTIVE ({activeSosCount})
                     </h4>
                     <p className="text-xs text-rose-100">
-                      Emergency distress check-in received for <strong>{INITIAL_MOCK_SOS_ALERTS[0].caseId} ({INITIAL_MOCK_SOS_ALERTS[0].patientAlias})</strong> in {INITIAL_MOCK_SOS_ALERTS[0].district}, {INITIAL_MOCK_SOS_ALERTS[0].state}.
+                      Emergency distress check-in received for <strong>{activeSosModalAlert.caseId} ({activeSosModalAlert.patientAlias})</strong> in {activeSosModalAlert.district}, {activeSosModalAlert.state}.
                     </p>
                   </div>
                 </div>
 
                 <button
-                  onClick={() => setActiveTab('SOS')}
+                  onClick={() => handleSelectSosAlert(activeSosModalAlert.caseId)}
                   className="px-4 py-2 rounded-xl bg-white text-rose-700 font-extrabold text-xs hover:bg-rose-50 transition-all shadow-md flex items-center gap-1.5"
                   aria-label="Respond to active emergency SOS alert"
                 >
@@ -1210,23 +1234,42 @@ export const CounsellorDashboard: React.FC = () => {
                         <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
                           Counsellor Private Notes (Visible strictly to clinical team)
                         </label>
-                        <div className="flex gap-2">
-                          <input
-                            type="text"
-                            defaultValue={rep.counsellorNotes || ''}
-                            onChange={(e) => setReportNoteText({ ...reportNoteText, [rep.id]: e.target.value })}
-                            placeholder="Add private clinical note regarding patient progression..."
-                            className="flex-1 px-4 py-2 rounded-xl bg-white border border-slate-200 text-xs text-slate-900 focus:outline-none focus:border-indigo-500 shadow-xs"
-                            aria-label="Add private counsellor note"
-                          />
-                          <button
-                            onClick={() => handleSaveReportNote(rep.id)}
-                            className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-xs transition-all"
-                            aria-label="Save private note"
-                          >
-                            Save Note
-                          </button>
-                        </div>
+                        {rep.counsellorNotes && !editingReportNotes[rep.id] ? (
+                          <div className="p-3 rounded-2xl bg-emerald-50/80 border border-emerald-200 flex items-center justify-between gap-3 shadow-xs">
+                            <div className="flex items-center gap-2">
+                              <span className="w-5 h-5 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold text-xs shadow-xs">✓</span>
+                              <div>
+                                <span className="text-[10px] font-bold uppercase text-emerald-800 tracking-wider block">Saved Clinical Note</span>
+                                <p className="text-xs text-slate-800 font-medium">{rep.counsellorNotes}</p>
+                              </div>
+                            </div>
+                            <button
+                              onClick={() => handleEditReportNote(rep.id, rep.counsellorNotes!)}
+                              className="px-3 py-1.5 rounded-xl bg-white hover:bg-slate-50 text-indigo-600 border border-indigo-200 font-bold text-xs shadow-xs transition-all flex items-center gap-1"
+                              aria-label="Edit private note"
+                            >
+                              Edit Note
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="flex gap-2">
+                            <input
+                              type="text"
+                              value={reportNoteText[rep.id] !== undefined ? reportNoteText[rep.id] : (rep.counsellorNotes || '')}
+                              onChange={(e) => setReportNoteText({ ...reportNoteText, [rep.id]: e.target.value })}
+                              placeholder="Add private clinical note regarding patient progression..."
+                              className="flex-1 px-4 py-2 rounded-xl bg-white border border-slate-200 text-xs text-slate-900 focus:outline-none focus:border-indigo-500 shadow-xs"
+                              aria-label="Add private counsellor note"
+                            />
+                            <button
+                              onClick={() => handleSaveReportNote(rep.id)}
+                              className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-xs transition-all"
+                              aria-label="Save private note"
+                            >
+                              Save Note
+                            </button>
+                          </div>
+                        )}
                       </div>
                     </div>
                   ))

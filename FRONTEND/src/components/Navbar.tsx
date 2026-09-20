@@ -5,7 +5,13 @@ import { useAuth } from '../auth/AuthContext';
 import { NotificationBell } from './NotificationBell';
 import { useLanguage } from '../context/LanguageContext';
 
-export const Navbar: React.FC<{ highRiskCount?: number }> = ({ highRiskCount = 0 }) => {
+import type { SOSAlert } from '../types';
+
+export const Navbar: React.FC<{
+  highRiskCount?: number;
+  sosAlerts?: SOSAlert[];
+  onSelectSosAlert?: (caseId: string) => void;
+}> = ({ highRiskCount = 0, sosAlerts = [], onSelectSosAlert }) => {
   const location = useLocation();
   const { session, logout } = useAuth();
   const { language, setLanguage, t } = useLanguage();
@@ -91,7 +97,7 @@ export const Navbar: React.FC<{ highRiskCount?: number }> = ({ highRiskCount = 0
                 </div>
 
                 {/* Animated High Risk Alert Bell */}
-                <NotificationBell count={highRiskCount} />
+                <NotificationBell count={highRiskCount} sosAlerts={sosAlerts} onSelectSosAlert={onSelectSosAlert} />
 
                 {/* Logout Button */}
                 <button

@@ -163,6 +163,28 @@ export const INITIAL_MOCK_SOS_ALERTS: SOSAlert[] = [
     state: "Haryana",
     district: "Rewari",
     status: "ACTIVE"
+  },
+  {
+    id: "SOS-7702",
+    caseId: "Case #4890",
+    patientAlias: "Victim H-209",
+    distressScore: 82,
+    scoreTrend: "rising",
+    timestamp: "2026-09-20T08:45:00Z",
+    state: "Haryana",
+    district: "Rewari",
+    status: "ACTIVE"
+  },
+  {
+    id: "SOS-7703",
+    caseId: "Case #4601",
+    patientAlias: "Victim H-512",
+    distressScore: 68,
+    scoreTrend: "rising",
+    timestamp: "2026-09-20T09:05:00Z",
+    state: "Haryana",
+    district: "Rewari",
+    status: "ACTIVE"
   }
 ];
 
